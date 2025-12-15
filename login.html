@@ -9,6 +9,7 @@
 
 <body class="login-page">
 
+<!-- ================= NAVBAR ================= -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
@@ -18,15 +19,18 @@
   </div>
 </div>
 
+<!-- ================= TITRE ================= -->
 <section class="hero" style="background:none;padding-top:60px;text-align:center">
   <h1>Connexion</h1>
   <p>Accédez à votre espace DGPE</p>
 </section>
 
+<!-- ================= FORM ================= -->
 <div class="login-wrap">
   <div class="login-card">
-    <label>Email professionnel</label>
-    <input id="email" type="email" class="input" placeholder="prenom.nom@dgpe.gouv.ci">
+
+    <label>Email</label>
+    <input id="email" type="email" class="input" placeholder="exemple@email.com">
 
     <label>Mot de passe</label>
     <input id="password" type="password" class="input">
@@ -34,15 +38,20 @@
     <button class="btn btn-primary" id="btnLogin">Connexion</button>
     <br><br>
     <button class="btn btn-secondary" id="btnRegister">Créer un compte</button>
+
   </div>
 </div>
 
-<!-- 🔥 FIREBASE -->
+<!-- ================= FIREBASE ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
-  from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
+  // 🔐 Configuration Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRocIFnubLqhJBwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
@@ -55,26 +64,44 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
 
-  document.getElementById("btnRegister").onclick = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email.value, password.value);
-      alert("Compte créé avec succès");
-    } catch (e) {
-      alert(e.message);
+  // 🆕 INSCRIPTION
+  document.getElementById("btnRegister").addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      alert("Veuillez remplir tous les champs.");
+      return;
     }
-  };
 
-  document.getElementById("btnLogin").onclick = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email.value, password.value);
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Compte créé avec succès !");
+    } catch (error) {
+      alert("Erreur : " + error.message);
+    }
+  });
+
+  // 🔑 CONNEXION
+  document.getElementById("btnLogin").addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       window.location.href = "dashboard.html";
-    } catch (e) {
-      alert("Connexion refusée");
+    } catch (error) {
+      alert("Connexion refusée : " + error.message);
     }
-  };
+  });
 </script>
 
 </body>
