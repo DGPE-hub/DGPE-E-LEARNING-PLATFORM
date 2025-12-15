@@ -4,28 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Connexion – DGPE</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="login-page">
 
-<!-- ================= NAVBAR ================= -->
+<!-- NAVBAR -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
-      <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
       <span class="brand">e-Learning</span>
     </div>
   </div>
 </div>
 
-<!-- ================= TITRE ================= -->
+<!-- TITRE -->
 <section class="hero" style="background:none;padding-top:60px;text-align:center">
   <h1>Connexion</h1>
   <p>Accédez à votre espace DGPE</p>
 </section>
 
-<!-- ================= FORM ================= -->
+<!-- FORM -->
 <div class="login-wrap">
   <div class="login-card">
 
@@ -42,22 +42,22 @@
   </div>
 </div>
 
-<!-- ================= SUPABASE SDK ================= -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-/* ================= SUPABASE CONFIG ================= */
+/* CONFIG SUPABASE */
 const supabase = window.supabase.createClient(
   "https://jwkhtvqazookghqrutvu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3a2h0dnFhem9va2docXJ1dHZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTk0ODYsImV4cCI6MjA4MTM3NTQ4Nn0.2WxrcxfJMUGRrsEo5ZVOZLDEsVk29NjaSSc5N3NKPbM"
 );
 
-/* ================= EMAIL PRO ================= */
+/* EMAIL PRO */
 function isEmailPro(email) {
   return !/@(gmail|yahoo|hotmail|outlook|icloud)\./i.test(email);
 }
 
-/* ================= INSCRIPTION ================= */
+/* INSCRIPTION */
 async function register() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -74,17 +74,21 @@ async function register() {
 
   const { error } = await supabase.auth.signUp({
     email,
-    password
+    password,
+    options: {
+      emailRedirectTo:
+        "https://dgpe-hub.github.io/DGPE-E-LEARNING-PLATFORM/login.html"
+    }
   });
 
   if (error) {
-    alert("Erreur inscription : " + error.message);
+    alert("Erreur : " + error.message);
   } else {
-    alert("Compte créé. Vérifiez votre email pour confirmer.");
+    alert("Compte créé. Vérifiez votre email.");
   }
 }
 
-/* ================= CONNEXION ================= */
+/* CONNEXION */
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -95,7 +99,7 @@ async function login() {
   });
 
   if (error) {
-    alert("Connexion refusée : " + error.message);
+    alert("Email non confirmé ou mot de passe incorrect.");
   } else {
     window.location.href = "dashboard.html";
   }
