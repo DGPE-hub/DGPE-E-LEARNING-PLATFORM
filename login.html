@@ -95,15 +95,13 @@
     }
 
     try {
-      const userCred =
-        await createUserWithEmailAndPassword(auth, email, password);
-
-      await sendEmailVerification(userCred.user);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(cred.user);
 
       alert(
         "✅ Compte créé avec succès\n\n" +
-        "📩 Un email de vérification vient d’être envoyé.\n" +
-        "⚠️ Utilisez uniquement le DERNIER mail reçu."
+        "📩 Un email de vérification a été envoyé.\n" +
+        "⚠️ Utilisez uniquement le DERNIER email reçu."
       );
 
     } catch (e) {
@@ -122,10 +120,12 @@
     }
 
     try {
-      const userCred =
-        await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
 
-      if (!userCred.user.emailVerified) {
+      // 🔄 Rafraîchir l'état Firebase (CRUCIAL)
+      await cred.user.reload();
+
+      if (!cred.user.emailVerified) {
         alert(
           "⚠️ Adresse email non vérifiée.\n\n" +
           "Cliquez sur « Renvoyer l’email de vérification »."
@@ -146,13 +146,13 @@
     const user = auth.currentUser;
 
     if (!user) {
-      alert("Connectez-vous d’abord.");
+      alert("Connectez-vous d’abord avec votre email et mot de passe.");
       return;
     }
 
     try {
       await sendEmailVerification(user);
-      alert("📩 Nouvel email de vérification envoyé.");
+      alert("📩 Un NOUVEL email de vérification a été envoyé.");
     } catch (e) {
       alert("Erreur : " + e.message);
     }
