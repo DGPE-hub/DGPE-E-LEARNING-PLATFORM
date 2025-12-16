@@ -9,7 +9,6 @@
 
 <body class="login-page">
 
-<!-- ================= NAVBAR ================= -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
@@ -19,13 +18,11 @@
   </div>
 </div>
 
-<!-- ================= TITRE ================= -->
 <section class="hero" style="padding-top:60px;text-align:center">
   <h1>Création de compte DGPE</h1>
   <p>Accès sécurisé par QR Code</p>
 </section>
 
-<!-- ================= FORM ================= -->
 <div class="login-wrap">
   <div class="login-card">
 
@@ -40,12 +37,11 @@
       Créer mon compte
     </button>
 
-    <p id="msg" style="margin-top:14px;font-size:13px;opacity:.8"></p>
+    <p id="msg" style="margin-top:15px;font-size:13px;opacity:.8"></p>
 
   </div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
   import {
@@ -59,73 +55,64 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-  // 🔐 Firebase config
+  // 🔐 Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
-    projectId: "dgpe-elearning",
-    storageBucket: "dgpe-elearning.appspot.com",
-    messagingSenderId: "564422941000",
-    appId: "1:564422941000:web:f5232cd0cebafb6aaf7b7d"
+    projectId: "dgpe-elearning"
   };
 
-  const app  = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  const emailInput = document.getElementById("email");
-  const passInput  = document.getElementById("password");
-  const msg        = document.getElementById("msg");
-
-  // ================= QR TOKEN =================
+  // 🔑 TOKEN QR
   const params = new URLSearchParams(window.location.search);
   const token  = params.get("token");
 
-  const TOKENS_VALIDES = [
-    "DGPE-2025-AGENT",
-    "DGPE-2025-FORMATION"
-  ];
+  const TOKENS_VALIDES = {
+    "DGPE-2025-AGENT": "AGENT",
+    "DGPE-2025-FORMATION": "FORMATION"
+  };
 
-  if (!token || !TOKENS_VALIDES.includes(token)) {
+  if (!token || !TOKENS_VALIDES[token]) {
     document.body.innerHTML = `
-      <h2 style="text-align:center;margin-top:80px">⛔ Accès refusé</h2>
-      <p style="text-align:center">QR Code invalide ou expiré.</p>
+      <div style="text-align:center;margin-top:120px">
+        <h2>⛔ Accès refusé</h2>
+        <p>QR Code invalide ou expiré.</p>
+      </div>
     `;
-    throw new Error("Token QR invalide");
+    throw new Error("QR invalide");
   }
 
-  // ================= CREATION COMPTE =================
+  const role = TOKENS_VALIDES[token];
+
+  // 🚀 Création compte
   document.getElementById("btnCreate").onclick = async () => {
-    if (!emailInput.value || !passInput.value) {
+    const email = emailInput.value.trim();
+    const pass  = password.value.trim();
+
+    if (!email || !pass) {
       alert("Veuillez remplir tous les champs.");
       return;
     }
 
     try {
-      // 1️⃣ Création Firebase Auth
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        emailInput.value.trim(),
-        passInput.value.trim()
-      );
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // 2️⃣ Enregistrement Firestore (clé du système)
+      // 📦 Enregistrement Firestore
       await setDoc(doc(db, "users", cred.user.uid), {
-        email: emailInput.value.trim(),
-        role: "AGENT",
-        status: "EN_ATTENTE",
-        createdVia: "QR_CODE",
+        email,
+        role,
+        status: "ACTIF",
         createdAt: serverTimestamp()
       });
 
-      msg.innerHTML = `
-        ✅ Compte créé avec succès.<br>
-        ⏳ En attente de validation par l’administration DGPE.
-      `;
+      msg.innerHTML = "✅ Compte créé avec succès. Redirection…";
 
       setTimeout(() => {
         window.location.href = "login.html";
-      }, 2500);
+      }, 2000);
 
     } catch (e) {
       alert("Erreur : " + e.message);
