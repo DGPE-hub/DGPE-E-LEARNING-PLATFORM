@@ -29,22 +29,41 @@
 <div class="login-wrap">
   <div class="login-card">
 
-    <label>Email</label>
-    <input id="email" type="email" class="input"
-           placeholder="prenom.nom@dgpe.gouv.ci">
+    <label>Email professionnel</label>
+    <input
+      id="email"
+      type="email"
+      class="input"
+      placeholder="prenom.nom@dgpe.gouv.ci"
+      autocomplete="username"
+    >
 
     <label>Mot de passe</label>
-    <input id="password" type="password" class="input">
+    <input
+      id="password"
+      type="password"
+      class="input"
+      autocomplete="current-password"
+    >
 
-    <button class="btn btn-primary" id="btnLogin">Connexion</button>
+    <button class="btn btn-primary" id="btnLogin">
+      Connexion
+    </button>
+
     <br><br>
 
-    <button class="btn btn-secondary" onclick="location.href='register-qr.html'">
+    <!-- 🔐 Création via QR -->
+    <button
+      class="btn btn-secondary"
+      id="btnQR"
+      type="button"
+    >
       Créer un compte (QR)
     </button>
 
-    <p style="margin-top:14px;font-size:13px;opacity:.75">
-      ℹ️ Les comptes sont activés par l’administration DGPE.
+    <p style="margin-top:14px;font-size:13px;opacity:.75;line-height:1.4">
+      ℹ️ Les comptes sont créés et activés exclusivement par
+      l’administration DGPE.
     </p>
 
   </div>
@@ -64,7 +83,7 @@
     getDoc
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-  // 🔐 Firebase
+  // 🔐 Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
@@ -78,7 +97,7 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // 🔴 Sécurité : aucune session fantôme
+  // 🔒 Sécurité : aucune session résiduelle
   await signOut(auth);
 
   const emailInput    = document.getElementById("email");
@@ -86,34 +105,33 @@
 
   // ================= CONNEXION =================
   document.getElementById("btnLogin").onclick = async () => {
-    if (!emailInput.value || !passwordInput.value) {
-      alert("Veuillez remplir tous les champs.");
+    const email = emailInput.value.trim();
+    const pass  = passwordInput.value.trim();
+
+    if (!email || !pass) {
+      alert("Veuillez renseigner votre email et votre mot de passe.");
       return;
     }
 
     try {
       // 1️⃣ Auth Firebase
-      const cred = await signInWithEmailAndPassword(
-        auth,
-        emailInput.value.trim(),
-        passwordInput.value.trim()
-      );
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
 
-      // 2️⃣ Vérification Firestore (ADMIN)
-      const userDoc = await getDoc(doc(db, "users", cred.user.uid));
+      // 2️⃣ Vérification administrative Firestore
+      const snap = await getDoc(doc(db, "users", cred.user.uid));
 
-      if (!userDoc.exists()) {
-        alert("⛔ Compte non reconnu par l’administration.");
+      if (!snap.exists()) {
+        alert("⛔ Compte non reconnu par l’administration DGPE.");
         await signOut(auth);
         return;
       }
 
-      const data = userDoc.data();
+      const user = snap.data();
 
-      if (data.status !== "ACTIF") {
+      if (user.status !== "ACTIF") {
         alert(
-          "⏳ Votre compte n’est pas encore activé.\n\n" +
-          "Veuillez attendre la validation par l’administration DGPE."
+          "⏳ Compte en attente de validation.\n\n" +
+          "Veuillez patienter jusqu’à l’activation par l’administration DGPE."
         );
         await signOut(auth);
         return;
@@ -123,8 +141,13 @@
       window.location.href = "dashboard.html";
 
     } catch (e) {
-      alert("Connexion refusée : " + e.message);
+      alert("❌ Connexion refusée.\n\n" + e.message);
     }
+  };
+
+  // ================= QR =================
+  document.getElementById("btnQR").onclick = () => {
+    window.location.href = "register-qr.html";
   };
 </script>
 
