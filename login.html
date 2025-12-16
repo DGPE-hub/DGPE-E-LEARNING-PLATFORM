@@ -101,8 +101,9 @@
 
       alert(
         "✅ Compte créé avec succès\n\n" +
-        "📩 Un email de vérification a été envoyé.\n" +
-        "➡️ Cliquez sur le lien reçu puis revenez ici."
+        "📩 Un email de vérification a été envoyé.\n\n" +
+        "➡️ Cliquez sur le lien reçu,\n" +
+        "➡️ puis revenez ici pour vous connecter."
       );
 
     } catch (e) {
@@ -125,13 +126,15 @@
         auth, email, password
       );
 
+      // Recharge l’état utilisateur
       await userCred.user.reload();
 
       if (!userCred.user.emailVerified) {
         btnResend.style.display = "block";
         alert(
           "⚠️ Adresse email non vérifiée.\n\n" +
-          "Veuillez vérifier votre boîte mail."
+          "Veuillez vérifier votre boîte mail\n" +
+          "puis vous reconnecter."
         );
         return;
       }
@@ -151,7 +154,7 @@
     await sendEmailVerification(auth.currentUser);
     alert(
       "📩 Nouvel email de vérification envoyé.\n\n" +
-      "⚠️ Les anciens liens ne fonctionnent plus."
+      "⚠️ Les anciens liens sont invalidés."
     );
   };
 </script>
