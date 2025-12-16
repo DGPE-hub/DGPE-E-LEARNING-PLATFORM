@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Demande de compte – DGPE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="login-page">
+
+<div class="navbar-login">
+  <div class="wrap">
+    <div class="logo-group">
+      <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+      <span class="brand">Demande de compte</span>
+    </div>
+  </div>
+</div>
+
+<section class="hero" style="padding-top:60px;text-align:center">
+  <h1>Demande de compte DGPE</h1>
+  <p>Création soumise à validation de l’administration</p>
+</section>
+
+<div class="login-wrap">
+  <div class="login-card">
+
+    <label>Email professionnel</label>
+    <input id="email" type="email" class="input"
+           placeholder="prenom.nom@dgpe.gouv.ci">
+
+    <label>Mot de passe</label>
+    <input id="password" type="password" class="input">
+
+    <button class="btn btn-primary" id="btnCreate">
+      Envoyer la demande
+    </button>
+
+    <p id="msg" style="margin-top:15px;font-size:14px"></p>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+  // 🔐 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
+    authDomain: "dgpe-elearning.firebaseapp.com",
+    projectId: "dgpe-elearning"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  await signOut(auth); // sécurité
+
+  const emailEl = document.getElementById("email");
+  const passEl  = document.getElementById("password");
+  const msgEl   = document.getElementById("msg");
+  const btn     = document.getElementById("btnCreate");
+
+  btn.onclick = async () => {
+    const email = emailEl.value.trim();
+    const pass  = passEl.value.trim();
+
+    if (!email || !pass) {
+      msgEl.style.color = "red";
+      msgEl.textContent = "Veuillez remplir tous les champs.";
+      return;
+    }
+
+    msgEl.style.color = "#0b2a4a";
+    msgEl.textContent = "⏳ Envoi de la demande…";
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      // 🔥 Création Firestore (EN_ATTENTE)
+      await setDoc(doc(db, "users", cred.user.uid), {
+        email: email,
+        role: "AGENT",
+        status: "EN_ATTENTE",
+        createdAt: serverTimestamp()
+      });
+
+      msgEl.style.color = "green";
+      msgEl.innerHTML =
+        "✅ Demande envoyée.<br>Votre compte sera activé par l’administration DGPE.";
+
+      await signOut(auth);
+
+    } catch (e) {
+      msgEl.style.color = "red";
+      msgEl.textContent = "❌ " + e.message;
+    }
+  };
+</script>
+
+</body>
+</html>
