@@ -30,7 +30,7 @@
   <div class="login-card">
 
     <label>Email</label>
-    <input id="email" type="email" class="input" placeholder="exemple@email.com">
+    <input id="email" type="email" class="input" placeholder="prenom.nom@dgpe.gouv.ci">
 
     <label>Mot de passe</label>
     <input id="password" type="password" class="input">
@@ -47,8 +47,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
   import {
     getAuth,
-    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
     sendEmailVerification
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
@@ -86,7 +86,7 @@
 
       alert(
         "Compte créé avec succès ✅\n\n" +
-        "Un email de vérification vous a été envoyé.\n" +
+        "Un email de vérification a été envoyé.\n" +
         "Veuillez vérifier votre boîte Outlook avant de vous connecter."
       );
 
