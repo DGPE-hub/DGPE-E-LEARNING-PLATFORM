@@ -9,7 +9,6 @@
 
 <body class="login-page">
 
-<!-- ================= NAVBAR ================= -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
@@ -19,13 +18,11 @@
   </div>
 </div>
 
-<!-- ================= TITRE ================= -->
-<section class="hero" style="background:none;padding-top:60px;text-align:center">
+<section class="hero" style="padding-top:60px;text-align:center">
   <h1>Connexion</h1>
   <p>Accédez à votre espace DGPE</p>
 </section>
 
-<!-- ================= FORM ================= -->
 <div class="login-wrap">
   <div class="login-card">
 
@@ -36,39 +33,28 @@
     <label>Mot de passe</label>
     <input id="password" type="password" class="input">
 
-    <button class="btn btn-primary" id="btnLogin">
-      Connexion
-    </button>
-
+    <button class="btn btn-primary" id="btnLogin">Connexion</button>
     <br><br>
 
-    <button class="btn btn-secondary" id="btnRegister">
-      Créer un compte
-    </button>
-
+    <button class="btn btn-secondary" id="btnRegister">Créer un compte</button>
     <br><br>
 
-    <button class="btn btn-secondary" id="btnResend">
+    <button class="btn btn-secondary" id="btnResend" style="display:none">
       Renvoyer l’email de vérification
     </button>
 
   </div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
 <script type="module">
-  import { initializeApp } from
-    "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification
-  } from
-    "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-  // 🔐 CONFIG FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
@@ -78,84 +64,63 @@
     appId: "1:564422941000:web:f5232cd0cebafb6aaf7b7d"
   };
 
-  const app  = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  const emailInput    = document.getElementById("email");
+  const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
+  const btnResend = document.getElementById("btnResend");
 
-  // ================= INSCRIPTION =================
+  // ===== INSCRIPTION =====
   document.getElementById("btnRegister").onclick = async () => {
-    const email    = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(cred.user);
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        emailInput.value.trim(),
+        passwordInput.value.trim()
+      );
+
+      await sendEmailVerification(userCred.user);
 
       alert(
-        "✅ Compte créé avec succès\n\n" +
-        "📩 Un email de vérification a été envoyé.\n" +
-        "⚠️ Utilisez uniquement le DERNIER email reçu."
+        "✅ Compte créé\n\n" +
+        "📩 Email de vérification envoyé.\n" +
+        "⚠️ Utilisez UNIQUEMENT le DERNIER email reçu."
       );
 
     } catch (e) {
-      alert("Erreur : " + e.message);
+      alert(e.message);
     }
   };
 
-  // ================= CONNEXION =================
+  // ===== CONNEXION =====
   document.getElementById("btnLogin").onclick = async () => {
-    const email    = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const userCred = await signInWithEmailAndPassword(
+        auth,
+        emailInput.value.trim(),
+        passwordInput.value.trim()
+      );
 
-      // 🔄 Rafraîchir l'état Firebase (CRUCIAL)
-      await cred.user.reload();
-
-      if (!cred.user.emailVerified) {
-        alert(
-          "⚠️ Adresse email non vérifiée.\n\n" +
-          "Cliquez sur « Renvoyer l’email de vérification »."
-        );
+      if (!userCred.user.emailVerified) {
+        btnResend.style.display = "block";
+        alert("⚠️ Email non vérifié. Vérifiez votre boîte.");
         return;
       }
 
-      // ✅ Accès autorisé
       window.location.href = "dashboard.html";
 
     } catch (e) {
-      alert("Connexion refusée : " + e.message);
+      alert(e.message);
     }
   };
 
-  // ================= RENVOI EMAIL =================
-  document.getElementById("btnResend").onclick = async () => {
-    const user = auth.currentUser;
+  // ===== RENVOI EMAIL =====
+  btnResend.onclick = async () => {
+    if (!auth.currentUser) return;
 
-    if (!user) {
-      alert("Connectez-vous d’abord avec votre email et mot de passe.");
-      return;
-    }
-
-    try {
-      await sendEmailVerification(user);
-      alert("📩 Un NOUVEL email de vérification a été envoyé.");
-    } catch (e) {
-      alert("Erreur : " + e.message);
-    }
+    await sendEmailVerification(auth.currentUser);
+    alert("📩 Nouvel email envoyé (ancien lien annulé).");
   };
 </script>
 
