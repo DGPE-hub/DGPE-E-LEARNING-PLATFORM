@@ -9,6 +9,7 @@
 
 <body class="login-page">
 
+<!-- ================= NAVBAR ================= -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
@@ -18,20 +19,32 @@
   </div>
 </div>
 
+<!-- ================= TITRE ================= -->
 <section class="hero" style="padding-top:60px;text-align:center">
   <h1>Création de compte DGPE</h1>
   <p>Accès sécurisé par QR Code</p>
 </section>
 
+<!-- ================= FORM ================= -->
 <div class="login-wrap">
   <div class="login-card">
 
     <label>Email professionnel</label>
-    <input id="email" type="email" class="input"
-           placeholder="prenom.nom@dgpe.gouv.ci">
+    <input
+      id="email"
+      type="email"
+      class="input"
+      placeholder="prenom.nom@dgpe.gouv.ci"
+      autocomplete="username"
+    >
 
     <label>Mot de passe</label>
-    <input id="password" type="password" class="input">
+    <input
+      id="password"
+      type="password"
+      class="input"
+      autocomplete="new-password"
+    >
 
     <button class="btn btn-primary" id="btnCreate">
       Créer mon compte
@@ -42,11 +55,13 @@
   </div>
 </div>
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
   import {
     getAuth,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    signOut
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
   import {
     getFirestore,
@@ -55,18 +70,21 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-  // 🔐 Firebase
+  // 🔐 Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
     projectId: "dgpe-elearning"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // 🎯 ÉLÉMENTS HTML (OBLIGATOIRE)
+  // 🔒 Sécurité : aucune session résiduelle
+  await signOut(auth);
+
+  // 🎯 Éléments HTML
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
   const btnCreate = document.getElementById("btnCreate");
@@ -81,12 +99,13 @@
     "DGPE-2025-FORMATION": "FORMATION"
   };
 
+  // ❌ Accès interdit si QR invalide
   if (!token || !TOKENS_VALIDES[token]) {
     document.body.innerHTML = `
-      <div style="text-align:center;margin-top:120px">
+      <section style="text-align:center;margin-top:120px">
         <h2>⛔ Accès refusé</h2>
         <p>QR Code invalide ou expiré.</p>
-      </div>
+      </section>
     `;
     throw new Error("QR invalide");
   }
@@ -109,15 +128,21 @@
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
+      // 📦 Enregistrement admin Firestore
       await setDoc(doc(db, "users", cred.user.uid), {
         email,
         role,
-        status: "ACTIF",
+        status: "ACTIF",   // peut être "EN_ATTENTE" si tu veux validation admin
         createdAt: serverTimestamp()
       });
 
       msg.style.color = "green";
-      msg.innerHTML = "✅ Compte créé avec succès.<br>Redirection vers la connexion…";
+      msg.innerHTML =
+        "✅ Compte créé avec succès.<br>" +
+        "Redirection vers la page de connexion…";
+
+      // 🔐 Déconnexion propre
+      await signOut(auth);
 
       setTimeout(() => {
         window.location.href = "login.html";
