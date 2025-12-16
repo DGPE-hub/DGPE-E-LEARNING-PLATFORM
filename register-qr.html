@@ -9,6 +9,7 @@
 
 <body class="login-page">
 
+<!-- ================= NAVBAR ================= -->
 <div class="navbar-login">
   <div class="wrap">
     <div class="logo-group">
@@ -18,11 +19,13 @@
   </div>
 </div>
 
+<!-- ================= TITRE ================= -->
 <section class="hero" style="padding-top:60px;text-align:center">
   <h1>Création de compte DGPE</h1>
   <p>Accès sécurisé par QR Code</p>
 </section>
 
+<!-- ================= FORM ================= -->
 <div class="login-wrap">
   <div class="login-card">
 
@@ -42,6 +45,7 @@
   </div>
 </div>
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
   import {
@@ -55,18 +59,24 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-  // 🔐 Firebase
+  /* ================= FIREBASE CONFIG ================= */
   const firebaseConfig = {
     apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
     authDomain: "dgpe-elearning.firebaseapp.com",
     projectId: "dgpe-elearning"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // 🔑 TOKEN QR
+  /* ================= ELEMENTS DOM ================= */
+  const emailInput = document.getElementById("email");
+  const passInput  = document.getElementById("password");
+  const msg        = document.getElementById("msg");
+  const btnCreate  = document.getElementById("btnCreate");
+
+  /* ================= TOKEN QR ================= */
   const params = new URLSearchParams(window.location.search);
   const token  = params.get("token");
 
@@ -82,15 +92,15 @@
         <p>QR Code invalide ou expiré.</p>
       </div>
     `;
-    throw new Error("QR invalide");
+    throw new Error("QR Code invalide");
   }
 
   const role = TOKENS_VALIDES[token];
 
-  // 🚀 Création compte
-  document.getElementById("btnCreate").onclick = async () => {
+  /* ================= CREATION COMPTE ================= */
+  btnCreate.addEventListener("click", async () => {
     const email = emailInput.value.trim();
-    const pass  = password.value.trim();
+    const pass  = passInput.value.trim();
 
     if (!email || !pass) {
       alert("Veuillez remplir tous les champs.");
@@ -100,10 +110,10 @@
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // 📦 Enregistrement Firestore
+      // 🔐 Enregistrement Firestore
       await setDoc(doc(db, "users", cred.user.uid), {
-        email,
-        role,
+        email: email,
+        role: role,
         status: "ACTIF",
         createdAt: serverTimestamp()
       });
@@ -117,7 +127,7 @@
     } catch (e) {
       alert("Erreur : " + e.message);
     }
-  };
+  });
 </script>
 
 </body>
