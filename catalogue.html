@@ -12,17 +12,20 @@
 <!-- ================= NAVBAR ================= -->
 <header class="navbar">
   <div class="wrap">
+
     <div class="logo-group">
       <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
       <span class="brand">e-Learning</span>
     </div>
 
+    <!-- MENU PUBLIC -->
     <nav class="nav" id="nav-public">
       <a href="index.html">Accueil</a>
       <a href="catalogue.html" class="active">Catalogue</a>
       <a href="login.html" class="pill">Connexion</a>
     </nav>
 
+    <!-- MENU PRIVÉ -->
     <nav class="nav hidden" id="nav-private">
       <a href="index.html">Accueil</a>
       <a href="catalogue.html" class="active">Catalogue</a>
@@ -30,6 +33,7 @@
       <a href="administration.html">Administration</a>
       <a href="#" class="pill" id="btnLogout">Déconnexion</a>
     </nav>
+
   </div>
 </header>
 
@@ -39,7 +43,10 @@
   <section class="panel">
     <h2>Catalogue des formations</h2>
 
-    <input id="searchInput" class="input" placeholder="Rechercher un module…">
+    <input
+      id="searchInput"
+      class="input"
+      placeholder="Rechercher un module…">
 
     <select id="filterDomaine" class="input">
       <option value="">Tous domaines</option>
@@ -69,30 +76,36 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import {
-  getAuth, onAuthStateChanged, signOut
+  getAuth,
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-/* ===== CONFIG ===== */
+/* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
   authDomain: "dgpe-elearning.firebaseapp.com",
   projectId: "dgpe-elearning"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
 const auth = getAuth(app);
 
-/* ===== UI ===== */
-const grid = document.getElementById("modulesGrid");
-const navPublic = document.getElementById("nav-public");
+/* ================= UI ================= */
+const grid       = document.getElementById("modulesGrid");
+const navPublic  = document.getElementById("nav-public");
 const navPrivate = document.getElementById("nav-private");
-const btnLogout = document.getElementById("btnLogout");
+const btnLogout  = document.getElementById("btnLogout");
 
-/* ===== AUTH UI ===== */
+/* ================= AUTH UI ================= */
 onAuthStateChanged(auth, user => {
   if (user) {
     navPublic.classList.add("hidden");
@@ -105,41 +118,67 @@ onAuthStateChanged(auth, user => {
 
 btnLogout.onclick = async () => {
   await signOut(auth);
-  window.location.reload();
+  window.location.href = "login.html";
 };
 
-/* ===== CHARGEMENT MODULES ===== */
+/* ================= CHARGER MODULES ================= */
 async function chargerModules() {
-  const recherche = document.getElementById("searchInput").value.toLowerCase();
-  const domaine = document.getElementById("filterDomaine").value;
+  const recherche = document
+    .getElementById("searchInput")
+    .value
+    .toLowerCase();
 
-  grid.innerHTML = "Chargement…";
+  const domaine = document
+    .getElementById("filterDomaine")
+    .value;
 
-  const snap = await getDocs(collection(db, "modules"));
-  let html = "";
+  grid.innerHTML = "Chargement des modules…";
 
-  snap.forEach(doc => {
-    const m = doc.data();
+  try {
+    let q = query(
+      collection(db, "modules"),
+      where("actif", "==", true)
+    );
 
-    if (
-      (domaine && m.domaine !== domaine) ||
-      (recherche && !m.titre.toLowerCase().includes(recherche))
-    ) return;
+    if (domaine) {
+      q = query(
+        collection(db, "modules"),
+        where("actif", "==", true),
+        where("domaine", "==", domaine)
+      );
+    }
 
-    html += `
-      <a href="module.html?id=${doc.id}" class="card">
-        <h3>${m.titre}</h3>
-        <p style="color:#a7b1bd">${m.domaine} • ${m.duree}</p>
-        <p>${m.resume}</p>
-      </a>
-    `;
-  });
+    const snap = await getDocs(q);
+    let html = "";
 
-  grid.innerHTML = html || "<p>Aucun module trouvé.</p>";
+    snap.forEach(docu => {
+      const m = docu.data();
+
+      if (recherche && !m.titre.toLowerCase().includes(recherche)) return;
+
+      html += `
+        <a href="module.html?id=${docu.id}" class="card">
+          <h3>${m.titre}</h3>
+          <p style="color:#a7b1bd">
+            ${m.domaine} • ${m.duree}
+          </p>
+          <p>${m.resume}</p>
+        </a>
+      `;
+    });
+
+    grid.innerHTML = html || "<p>Aucun module trouvé.</p>";
+
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = "❌ Erreur lors du chargement des modules.";
+  }
 }
 
+/* ================= EVENTS ================= */
 document.getElementById("btnSearch").onclick = chargerModules;
 chargerModules();
+
 </script>
 
 <script src="assets/js/app.js"></script>
