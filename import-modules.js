@@ -1,35 +1,98 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>Import des modules DGPE</title>
+/* ===============================
+   FIREBASE
+================================ */
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
-  <style>
-    body {
-      background:#071b33;
-      color:#e8f1ff;
-      font-family: Consolas, monospace;
-      padding: 40px;
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+  query,
+  where
+} from
+  "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+/* ===============================
+   CONFIG DGPE (LA TIENNE)
+================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
+  authDomain: "dgpe-elearning.firebaseapp.com",
+  projectId: "dgpe-elearning",
+  storageBucket: "dgpe-elearning.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+/* ===============================
+   INIT
+================================ */
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+/* ===============================
+   MODULES DGPE 2026
+================================ */
+const MODULES_DGPE = [
+  { titre:"Gouvernance stratégique et analyse financière", domaine:"Gouvernance", duree:"4 j" },
+  { titre:"Pilotage stratégique", domaine:"Gouvernance", duree:"4 j" },
+  { titre:"Audit & conformité", domaine:"Gouvernance", duree:"3 j" },
+  { titre:"Performance & KPI", domaine:"Performance", duree:"2 j" },
+  { titre:"Transformation digitale", domaine:"Digital", duree:"3 j" },
+  { titre:"IA & Décision", domaine:"Digital", duree:"2 j" },
+  { titre:"Leadership", domaine:"Management", duree:"2 j" },
+  { titre:"Communication de crise", domaine:"Management", duree:"2 j" },
+  { titre:"RSE : Concevoir et piloter une stratégie durable", domaine:"Gouvernance", duree:"3 j" },
+  { titre:"Manager le changement durable", domaine:"Management", duree:"2 j" }
+];
+
+/* ===============================
+   LOG
+================================ */
+const logEl = document.getElementById("log");
+const log = (m) => logEl.textContent += "\n" + m;
+
+/* ===============================
+   CRÉATION SÉCURISÉE
+================================ */
+async function creerModulesDGPE() {
+
+  log("🔌 Connexion Firestore OK");
+  let created = 0;
+
+  for (const m of MODULES_DGPE) {
+
+    // Anti-doublon
+    const q = query(
+      collection(db,"modules"),
+      where("titre","==",m.titre)
+    );
+
+    const snap = await getDocs(q);
+
+    if (!snap.empty) {
+      log(`⏭ Déjà existant : ${m.titre}`);
+      continue;
     }
-    h1 { color:#ffd34d }
-    pre {
-      margin-top:20px;
-      background:#021024;
-      padding:20px;
-      border-radius:6px;
-      white-space:pre-wrap;
-    }
-  </style>
-</head>
 
-<body>
+    await addDoc(collection(db,"modules"),{
+      titre: m.titre,
+      domaine: m.domaine,
+      duree: m.duree,
+      actif: true,
+      createdAt: serverTimestamp()
+    });
 
-<h1>Import des modules DGPE</h1>
-<p>Création des modules officiels 2026.</p>
+    log(`✅ Créé : ${m.titre} → ${m.duree}`);
+    created++;
+  }
 
-<pre id="log">⏳ Lancement du script...</pre>
+  log("────────────────────────────");
+  log(`🎯 Modules créés : ${created}`);
+  log("✅ IMPORT TERMINÉ");
+}
 
-<script type="module" src="./import-modules.js"></script>
-
-</body>
-</html>
+creerModulesDGPE();
