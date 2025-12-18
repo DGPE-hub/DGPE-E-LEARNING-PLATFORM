@@ -31,20 +31,19 @@ function normalize(txt = "") {
 }
 
 /* ===== RÈGLES OFFICIELLES DGPE 2026 ===== */
-const rules = [
-  { match: ["gouvernance"], duree: "4 j" },
-  { match: ["pilotage"], duree: "4 j" },
-  { match: ["audit"], duree: "3 j" },
-  { match: ["performance", "kpi"], duree: "2 j" },
-  { match: ["transformation", "digitale"], duree: "3 j" },
-  { match: ["ia"], duree: "2 j" },
-  { match: ["decision"], duree: "2 j" },
-  { match: ["leadership"], duree: "2 j" },
-  { match: ["crise"], duree: "2 j" },
-  { match: ["rse"], duree: "3 j" },
-  { match: ["changement"], duree: "2 j" }
+const dureesDGPE = {
+  "gouvernance strategique et analyse financiere": "4 j",
+  "pilotage strategique": "4 j",
+  "audit et conformite": "3 j",
+  "performance et kpi": "2 j",
+  "transformation digitale": "3 j",
+  "ia et decision": "2 j",
+  "leadership": "2 j",
+  "communication de crise": "2 j",
+  "rse concevoir et piloter une strategie durable": "3 j",
+  "manager le changement durable": "2 j"
+};
 ];
-
 /* ===== CORRECTION ===== */
 async function corrigerDurees() {
   const snap = await getDocs(collection(db, "modules"));
