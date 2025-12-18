@@ -1,57 +1,38 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <title>Import des modules DGPE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <title>Import modules DGPE</title>
 
   <style>
     body {
       margin: 0;
       padding: 40px;
-      font-family: Consolas, monospace;
-      background: #081c2e;
-      color: #ffffff;
+      font-family: Arial, sans-serif;
+      background: #061b33;
+      color: #fff;
     }
     h1 {
-      color: #f6b100;
+      color: #f5b301;
     }
-    pre {
+    #log {
       margin-top: 20px;
+      background: #0b2a4d;
       padding: 20px;
-      background: #0f2d46;
       border-radius: 8px;
-      white-space: pre-wrap;
+      white-space: pre-line;
+      font-family: monospace;
     }
   </style>
 </head>
 
 <body>
-
   <h1>Import des modules DGPE</h1>
   <p>Création des modules officiels 2026.</p>
 
-  <pre id="log">⏳ Lancement du script...</pre>
+  <div id="log">⏳ Initialisation...</div>
 
-  <!-- 🔥 INITIALISATION FIREBASE (OBLIGATOIRE) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvutySxLttyHqs",
-      authDomain: "dgpe-elearning.firebaseapp.com",
-      projectId: "dgpe-elearning",
-      storageBucket: "dgpe-elearning.firebasestorage.app",
-      messagingSenderId: "564422941000",
-      appId: "1:564422941000:web:f523c0d0cebaf6aaf7b7d",
-      measurementId: "G-3H1K6LJ12J"
-    };
-
-    initializeApp(firebaseConfig);
-  </script>
-
-  <!-- 🚀 SCRIPT D’IMPORT -->
-  <script type="module" src="./import-modules.js"></script>
-
+  <!-- SCRIPT FIREBASE -->
+  <script type="module" src="./update-durees.js"></script>
 </body>
 </html>
