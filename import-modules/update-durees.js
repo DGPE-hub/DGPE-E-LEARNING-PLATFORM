@@ -2,12 +2,14 @@ import {
   getFirestore,
   collection,
   getDocs,
-  updateDoc,
-  doc
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
+/* ==============================
+   FIREBASE CONFIG
+============================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
   authDomain: "dgpe-elearning.firebaseapp.com",
@@ -17,7 +19,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* 🔹 Mapping officiel DGPE – Plan de formation 2026 */
+/* ==============================
+   MAPPING OFFICIEL DGPE 2026
+============================== */
 const dureesDGPE = {
   "Gouvernance stratégique et analyse financière": "4 j",
   "Pilotage stratégique": "4 j",
@@ -31,25 +35,55 @@ const dureesDGPE = {
   "Manager le changement durable": "2 j"
 };
 
+/* ==============================
+   NORMALISATION DES TITRES
+============================== */
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+/* ==============================
+   CORRECTION DES DURÉES
+============================== */
 async function corrigerDurees() {
   const snap = await getDocs(collection(db, "modules"));
-
   let count = 0;
 
-  for (const d of snap.docs) {
-    const data = d.data();
-    const duree = dureesDGPE[data.titre];
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data();
+    const titreModule = data.titre || data.nom;
 
-    if (duree && data.duree !== duree) {
-      await updateDoc(doc(db, "modules", d.id), {
-        duree
-      });
-      count++;
-      console.log(`✔ ${data.titre} → ${duree}`);
+    if (!titreModule) continue;
+
+    const cleCorrespondante = Object.keys(dureesDGPE).find(
+      key => normalize(key) === normalize(titreModule)
+    );
+
+    if (cleCorrespondante) {
+      const nouvelleDuree = dureesDGPE[cleCorrespondante];
+
+      if (data.duree !== nouvelleDuree) {
+        await updateDoc(docSnap.ref, {
+          duree: nouvelleDuree
+        });
+
+        console.log(`✔ ${titreModule} → ${nouvelleDuree}`);
+        count++;
+      }
     }
   }
 
-  document.body.innerHTML += `<p>✅ ${count} modules mis à jour.</p>`;
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `<p>✅ ${count} modules mis à jour.</p>`
+  );
 }
 
+/* ==============================
+   LANCEMENT
+============================== */
 corrigerDurees();
