@@ -1,3 +1,4 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -6,57 +7,75 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 /* ===============================
-   FIRESTORE
+   CONFIG FIREBASE (OFFICIELLE)
 ================================ */
-const db = getFirestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyDLeMFoRoclFnfubLqhJBvwtySxLttyHqs",
+  authDomain: "dgpe-elearning.firebaseapp.com",
+  projectId: "dgpe-elearning",
+  storageBucket: "dgpe-elearning.firebasestorage.app",
+  messagingSenderId: "564422941000",
+  appId: "1:564422941000:web:f5232cd0cebafb6aaf7b7d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
 /* ===============================
    MODULES DGPE OFFICIELS 2026
 ================================ */
 const MODULES_DGPE = [
-  { titre: "Gouvernance stratégique et analyse financière", domaine: "Gouvernance", duree: "4 jours" },
-  { titre: "Pilotage stratégique", domaine: "Gouvernance", duree: "4 jours" },
-  { titre: "Audit et conformité", domaine: "Gouvernance", duree: "3 jours" },
-  { titre: "Performance et KPI", domaine: "Performance", duree: "2 jours" },
-  { titre: "Transformation digitale", domaine: "Digital", duree: "3 jours" },
-  { titre: "Intelligence artificielle et décision", domaine: "Digital", duree: "2 jours" },
-  { titre: "Leadership et management public", domaine: "Management", duree: "2 jours" },
-  { titre: "Communication de crise", domaine: "Management", duree: "2 jours" },
-  { titre: "RSE – stratégie et pilotage durable", domaine: "Gouvernance", duree: "3 jours" },
-  { titre: "Manager le changement durable", domaine: "Management", duree: "2 jours" }
+  { titre: "Gouvernance stratégique et analyse financière", domaine: "Gouvernance", duree: "4 j" },
+  { titre: "Pilotage stratégique", domaine: "Gouvernance", duree: "4 j" },
+  { titre: "Audit & conformité", domaine: "Gouvernance", duree: "3 j" },
+  { titre: "Performance & KPI", domaine: "Performance", duree: "2 j" },
+  { titre: "Transformation digitale", domaine: "Digital", duree: "3 j" },
+  { titre: "IA & Décision", domaine: "Digital", duree: "2 j" },
+  { titre: "Leadership", domaine: "Management", duree: "2 j" },
+  { titre: "Communication de crise", domaine: "Management", duree: "2 j" },
+  { titre: "RSE : Concevoir et piloter une stratégie durable", domaine: "Gouvernance", duree: "3 j" },
+  { titre: "Manager le changement durable", domaine: "Management", duree: "2 j" }
 ];
 
 /* ===============================
-   IMPORT DANS FIRESTORE
+   LOG UI
+================================ */
+const logBox = document.getElementById("log");
+function log(msg) {
+  console.log(msg);
+  logBox.textContent += "\n" + msg;
+}
+
+/* ===============================
+   IMPORT FIRESTORE
 ================================ */
 async function creerModulesDGPE() {
-  const log = document.getElementById("log");
-  let count = 0;
-
-  log.textContent = "🔥 Connexion à Firestore...\n\n";
-
   try {
-    for (const module of MODULES_DGPE) {
+    log("🔌 Connexion à Firestore…");
+
+    let count = 0;
+
+    for (const m of MODULES_DGPE) {
       await addDoc(collection(db, "modules"), {
-        titre: module.titre,
-        domaine: module.domaine,
-        duree: module.duree,
+        titre: m.titre,
+        domaine: m.domaine,
+        duree: m.duree,
         actif: true,
         createdAt: serverTimestamp()
       });
 
-      log.textContent += `✔ ${module.titre} (${module.duree})\n`;
       count++;
+      log(`✔ ${m.titre} → ${m.duree}`);
     }
 
-    log.textContent += "\n=============================\n";
-    log.textContent += `✅ Modules créés : ${count}\n`;
-    log.textContent += "🎉 IMPORT TERMINÉ AVEC SUCCÈS\n";
+    log("================================");
+    log(`✅ Modules créés : ${count}`);
+    log("🎉 IMPORT TERMINÉ");
 
-  } catch (error) {
-    log.textContent += "\n❌ ERREUR :\n";
-    log.textContent += error.message;
-    console.error(error);
+  } catch (err) {
+    console.error(err);
+    log("❌ ERREUR FIRESTORE");
+    log(err.message);
   }
 }
 
