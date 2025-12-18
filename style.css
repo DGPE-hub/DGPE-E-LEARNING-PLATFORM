@@ -21,17 +21,14 @@ body {
   background: url("assets/img/fond-nuit.jpg") center/cover fixed no-repeat;
 }
 
-/* Login */
+/* Login uniquement */
 body.login-page {
   min-height: 100vh;
-  background: url("assets/img/fond-jour.jpg") no-repeat center center fixed;
-  background-size: cover;
+  background: url("assets/img/fond-jour.jpg") center/cover fixed no-repeat;
 }
 
-/* Utilitaire */
-.hidden {
-  display: none !important;
-}
+/* Utilitaires */
+.hidden { display: none !important; }
 
 /* ======================================================
    NAVBAR
@@ -49,14 +46,14 @@ body.login-page {
 .navbar .wrap,
 .navbar-login .wrap {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: auto;
   padding: 12px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* Logo + titre */
+/* Logo */
 .logo-group {
   display: flex;
   align-items: center;
@@ -65,45 +62,33 @@ body.login-page {
 
 .logo {
   height: 90px;
-  width: auto;
-  object-fit: contain;
   filter:
     drop-shadow(0 0 6px rgba(30,102,255,.7))
     drop-shadow(0 0 12px rgba(30,102,255,.5));
 }
 
-/* Titre e-Learning */
+/* Titre */
 .brand {
   font-size: 34px;
   font-weight: 700;
   color: #fff;
-  white-space: nowrap;
-  transform: translateY(4px);
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
-/* Animation lueur */
 @keyframes pulseGlow {
-  0% {
-    text-shadow: 0 0 4px rgba(255,255,255,.4),
-                 0 0 8px rgba(30,102,255,.3);
+  0%,100% {
+    text-shadow: 0 0 6px rgba(255,255,255,.4);
   }
   50% {
-    text-shadow: 0 0 12px rgba(255,255,255,.7),
-                 0 0 22px rgba(30,102,255,.8);
-  }
-  100% {
-    text-shadow: 0 0 4px rgba(255,255,255,.4),
-                 0 0 8px rgba(30,102,255,.3);
+    text-shadow: 0 0 18px rgba(30,102,255,.9);
   }
 }
 
-/* Menu desktop */
+/* Menu */
 .nav {
   margin-left: auto;
   display: flex;
   gap: 22px;
-  align-items: center;
 }
 
 .nav a {
@@ -120,21 +105,14 @@ body.login-page {
 
 .nav .pill {
   background: var(--dgpe-accent);
-  color: #fff;
   padding: 10px 16px;
   border-radius: 999px;
 }
 
 /* ======================================================
-   BURGER & MENU MOBILE
+   MOBILE MENU
 ====================================================== */
-.burger {
-  display: none;
-  margin-left: auto;
-  cursor: pointer;
-  background: none;
-  border: 0;
-}
+.burger { display: none; background: none; border: 0; cursor: pointer; }
 
 .burger span,
 .burger::before,
@@ -145,135 +123,62 @@ body.login-page {
   height: 2px;
   background: #fff;
   margin: 6px 0;
-  transition: .3s;
 }
 
-.burger.active::before {
-  transform: translateY(8px) rotate(45deg);
-}
-.burger.active::after {
-  transform: translateY(-8px) rotate(-45deg);
-}
-.burger.active span {
-  opacity: 0;
-}
-
-/* Offcanvas */
 .offcanvas {
   position: fixed;
-  top: 0;
   right: -320px;
+  top: 0;
   width: 300px;
   height: 100vh;
   background: rgba(5,20,36,.98);
   backdrop-filter: blur(8px);
-  transition: right .35s ease;
+  transition: .35s;
   z-index: 1200;
   padding: 18px;
 }
 
 .offcanvas.open { right: 0; }
 
-.offcanvas .menu {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 24px;
-}
-
-.offcanvas a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.offcanvas a:hover {
-  background: rgba(255,255,255,.08);
-}
-
-.offcanvas .close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 26px;
-  cursor: pointer;
-}
-
 /* ======================================================
-   HERO & CONTENU
+   HERO
 ====================================================== */
 .hero {
   min-height: 56vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  position: relative;
   background: linear-gradient(180deg, rgba(11,53,91,.9), rgba(11,53,91,.9));
 }
 
-.hero.stripes::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    -30deg,
-    rgba(255,255,255,.06) 0,
-    rgba(255,255,255,.06) 2px,
-    transparent 2px,
-    transparent 20px
-  );
-}
-
 .hero .inner {
-  position: relative;
-  max-width: 900px;
+  text-align: center;
   padding: 40px 20px;
 }
 
-.hero h1 {
-  font-size: 46px;
-  margin-bottom: 10px;
-}
+.hero h1 { font-size: 46px; }
+.hero p { color: var(--muted); font-size: 18px; }
 
-.hero p {
-  color: var(--muted);
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Boutons */
+/* ======================================================
+   BOUTONS
+====================================================== */
 .btn {
-  display: inline-block;
-  font-weight: 700;
   background: var(--dgpe-accent);
   color: #fff;
   padding: 14px 22px;
   border-radius: 999px;
   text-decoration: none;
-  box-shadow: 0 10px 24px rgba(30,102,255,.25);
-}
-
-.btn:hover {
-  transform: translateY(-2px);
+  font-weight: 700;
 }
 
 /* ======================================================
-   CARDS & PANELS
+   SECTIONS / CARDS
 ====================================================== */
 .section,
 .page {
   max-width: 1200px;
   margin: 32px auto;
   padding: 0 20px;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-  gap: 18px;
 }
 
 .card,
@@ -296,25 +201,10 @@ body.login-page {
 
 .login-card {
   width: 420px;
-  background: #fff;
+  background: #ffffff;
   color: #0b1a2b;
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.25);
-}
-
-.input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #d0d7de;
-  margin-bottom: 14px;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #84b2ff;
-  box-shadow: 0 0 0 3px rgba(30,102,255,.2);
 }
 
 /* ======================================================
@@ -328,7 +218,6 @@ body.login-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5000;
 }
 
 .popup-card {
@@ -336,8 +225,35 @@ body.login-page {
   color: #0b1a2b;
   border-radius: 18px;
   padding: 26px;
-  width: 360px;
-  text-align: center;
+}
+
+/* ======================================================
+   ADMINISTRATION – CORRECTION BLOC BLANC
+====================================================== */
+.admin-container,
+.admin-wrapper,
+.admin-card,
+.admin-panel {
+  background: rgba(6,20,38,.55) !important;
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+}
+
+/* Tableau admin lisible */
+.admin-card table {
+  background: #ffffff;
+  color: #0b1a2b;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* Suppression totale du blanc parasite */
+.bg-white,
+.white,
+.panel-default {
+  background: transparent !important;
 }
 
 /* ======================================================
