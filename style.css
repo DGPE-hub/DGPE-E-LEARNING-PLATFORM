@@ -360,3 +360,10 @@ body.admin-page .empty-state,
 body.admin-page .hint {
   color: rgba(230,237,243,.78) !important;
 }
+/* 🔥 FORÇAGE : suppression tableau inscriptions admin */
+table,
+#tableInscriptions,
+section h2:has(+ table),
+section:has(table) {
+  display: none !important;
+}
