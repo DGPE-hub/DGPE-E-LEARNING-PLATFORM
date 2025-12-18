@@ -6,7 +6,7 @@
   --text: #e6edf3;
   --muted: #a7b1bd;
   --glass: rgba(255,255,255,.06);
-  --glass-bd: rgba(255,255,255,.08);
+  --glass-bd: rgba(255,255,255,.10);
 }
 
 /* ======================================================
@@ -21,10 +21,16 @@ body {
   background: url("assets/img/fond-nuit.jpg") center/cover fixed no-repeat;
 }
 
-/* Login uniquement */
+/* Pages spécifiques */
 body.login-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: url("assets/img/fond-jour.jpg") center/cover fixed no-repeat;
+}
+
+body.admin-page {
+  background: url("assets/img/fond-nuit.jpg") center/cover fixed no-repeat;
 }
 
 /* Utilitaires */
@@ -43,8 +49,7 @@ body.login-page {
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
-.navbar .wrap,
-.navbar-login .wrap {
+.navbar .wrap {
   max-width: 1200px;
   margin: auto;
   padding: 12px 20px;
@@ -53,7 +58,6 @@ body.login-page {
   gap: 16px;
 }
 
-/* Logo */
 .logo-group {
   display: flex;
   align-items: center;
@@ -61,41 +65,27 @@ body.login-page {
 }
 
 .logo {
-  height: 90px;
-  filter:
-    drop-shadow(0 0 6px rgba(30,102,255,.7))
-    drop-shadow(0 0 12px rgba(30,102,255,.5));
+  height: 80px;
+  filter: drop-shadow(0 0 10px rgba(30,102,255,.6));
 }
 
-/* Titre */
 .brand {
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 700;
   color: #fff;
-  animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
-@keyframes pulseGlow {
-  0%,100% {
-    text-shadow: 0 0 6px rgba(255,255,255,.4);
-  }
-  50% {
-    text-shadow: 0 0 18px rgba(30,102,255,.9);
-  }
-}
-
-/* Menu */
 .nav {
   margin-left: auto;
   display: flex;
-  gap: 22px;
+  gap: 20px;
 }
 
 .nav a {
   color: #e8f0f7;
   text-decoration: none;
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 10px;
 }
 
@@ -105,77 +95,29 @@ body.login-page {
 
 .nav .pill {
   background: var(--dgpe-accent);
-  padding: 10px 16px;
   border-radius: 999px;
+  padding: 10px 18px;
 }
-
-/* ======================================================
-   MOBILE MENU
-====================================================== */
-.burger { display: none; background: none; border: 0; cursor: pointer; }
-
-.burger span,
-.burger::before,
-.burger::after {
-  content: "";
-  display: block;
-  width: 26px;
-  height: 2px;
-  background: #fff;
-  margin: 6px 0;
-}
-
-.offcanvas {
-  position: fixed;
-  right: -320px;
-  top: 0;
-  width: 300px;
-  height: 100vh;
-  background: rgba(5,20,36,.98);
-  backdrop-filter: blur(8px);
-  transition: .35s;
-  z-index: 1200;
-  padding: 18px;
-}
-
-.offcanvas.open { right: 0; }
 
 /* ======================================================
    HERO
 ====================================================== */
 .hero {
-  min-height: 56vh;
+  min-height: 35vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(180deg, rgba(11,53,91,.9), rgba(11,53,91,.9));
 }
 
-.hero .inner {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.hero h1 { font-size: 46px; }
-.hero p { color: var(--muted); font-size: 18px; }
-
-/* ======================================================
-   BOUTONS
-====================================================== */
-.btn {
-  background: var(--dgpe-accent);
-  color: #fff;
-  padding: 14px 22px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 700;
-}
+.hero h1 { font-size: 42px; }
+.hero p  { color: var(--muted); }
 
 /* ======================================================
    SECTIONS / CARDS
 ====================================================== */
-.section,
-.page {
+.page,
+.section {
   max-width: 1200px;
   margin: 32px auto;
   padding: 0 20px;
@@ -187,73 +129,57 @@ body.login-page {
   border: 1px solid var(--glass-bd);
   border-radius: 18px;
   padding: 22px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
 }
 
 /* ======================================================
-   LOGIN
+   LOGIN (CORRIGÉ)
 ====================================================== */
 .login-wrap {
+  flex: 1;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 30px 16px;
+  padding-bottom: 60px;
 }
 
 .login-card {
   width: 420px;
-  background: #ffffff;
+  background: #fff;
   color: #0b1a2b;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 28px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.35);
 }
 
 /* ======================================================
-   POPUP
+   ADMIN
 ====================================================== */
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(5,20,36,.65);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+body.admin-page .panel,
+body.admin-page .card {
+  background: rgba(255,255,255,.06);
+  color: #e6edf3;
 }
 
-.popup-card {
-  background: #f9fafb;
-  color: #0b1a2b;
-  border-radius: 18px;
-  padding: 26px;
+/* Tableau admin */
+body.admin-page table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* ======================================================
-   ADMINISTRATION – CORRECTION BLOC BLANC
-====================================================== */
-.admin-container,
-.admin-wrapper,
-.admin-card,
-.admin-panel {
-  background: rgba(6,20,38,.55) !important;
-  backdrop-filter: blur(8px);
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+body.admin-page thead th {
+  background: rgba(5,20,36,.75);
+  color: #fff;
 }
 
-/* Tableau admin lisible */
-.admin-card table {
-  background: #ffffff;
-  color: #0b1a2b;
-  border-radius: 14px;
-  overflow: hidden;
+body.admin-page td,
+body.admin-page th {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
 }
 
-/* Suppression totale du blanc parasite */
-.bg-white,
-.white,
-.panel-default {
-  background: transparent !important;
+body.admin-page tbody tr:hover {
+  background: rgba(255,255,255,.06);
 }
 
 /* ======================================================
@@ -270,100 +196,6 @@ body.login-page {
 /* ======================================================
    RESPONSIVE
 ====================================================== */
-@media (max-width:960px) {
+@media (max-width: 960px) {
   .nav { display: none; }
-  .burger { display: block; }
-}
-/* ======================================================
-   ADMIN OVERRIDE (SUPPRIME LE "BLOC BLANC")
-   À mettre TOUT EN BAS de style.css
-====================================================== */
-body.admin-page .page,
-body.admin-page .section {
-  max-width: 1200px;
-  margin: 28px auto;
-  padding: 0 20px;
-}
-
-/* Le grand conteneur blanc (card/panel/wrap) -> glass */
-body.admin-page .card,
-body.admin-page .panel,
-body.admin-page .container,
-body.admin-page .box,
-body.admin-page .admin-card,
-body.admin-page .admin-panel,
-body.admin-page .table-card,
-body.admin-page .table-wrap {
-  background: rgba(255,255,255,.06) !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  color: #e6edf3 !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 18px 50px rgba(0,0,0,.35) !important;
-}
-
-/* Si un overlay blanc est appliqué via ::before/::after */
-body.admin-page .card::before,
-body.admin-page .card::after,
-body.admin-page .panel::before,
-body.admin-page .panel::after,
-body.admin-page .admin-card::before,
-body.admin-page .admin-card::after,
-body.admin-page .admin-panel::before,
-body.admin-page .admin-panel::after,
-body.admin-page .table-card::before,
-body.admin-page .table-card::after,
-body.admin-page .table-wrap::before,
-body.admin-page .table-wrap::after {
-  background: transparent !important;
-  opacity: 0 !important;
-  content: none !important;
-}
-
-/* Titres dans l’admin */
-body.admin-page h1,
-body.admin-page h2,
-body.admin-page h3 {
-  color: #ffffff !important;
-  text-shadow: 0 0 12px rgba(30,102,255,.25);
-}
-
-/* Table : enlève le fond blanc */
-body.admin-page table,
-body.admin-page thead,
-body.admin-page tbody,
-body.admin-page tr,
-body.admin-page th,
-body.admin-page td {
-  background: transparent !important;
-  color: #e6edf3 !important;
-}
-
-/* En-tête table (reste bleu DGPE) */
-body.admin-page thead th {
-  background: rgba(5,20,36,.65) !important;
-  border-bottom: 1px solid rgba(255,255,255,.12) !important;
-}
-
-/* Lignes */
-body.admin-page tbody tr {
-  border-bottom: 1px solid rgba(255,255,255,.08) !important;
-}
-body.admin-page tbody tr:hover {
-  background: rgba(255,255,255,.06) !important;
-}
-
-/* Texte “Aucune demande…” (souvent trop clair sur fond) */
-body.admin-page .muted,
-body.admin-page .empty,
-body.admin-page .empty-state,
-body.admin-page .hint {
-  color: rgba(230,237,243,.78) !important;
-}
-/* 🔥 FORÇAGE : suppression tableau inscriptions admin */
-table,
-#tableInscriptions,
-section h2:has(+ table),
-section:has(table) {
-  display: none !important;
 }
