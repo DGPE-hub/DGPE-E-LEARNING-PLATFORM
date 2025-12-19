@@ -1,180 +1,143 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Connexion – DGPE</title>
-  <link rel="stylesheet" href="./style.css?v=20251219-1" />
+  <link rel="stylesheet" href="./style.css?v=dgpe-login-final">
 </head>
 
 <body class="login-page">
 
-  <!-- NAVBAR -->
-  <header class="navbar-login">
-    <div class="wrap">
-      <div class="logo-group">
-        <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
-        <span class="brand">e-Learning</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- HERO -->
-  <section class="hero hero-login">
-    <div class="inner">
-      <h1>Connexion</h1>
-      <p>Accès réservé aux utilisateurs autorisés</p>
-    </div>
-  </section>
-
-  <!-- FORM -->
-  <main class="login-wrap">
-    <section class="login-card" aria-label="Formulaire de connexion">
-      <h2>Accès à la plateforme</h2>
-
-      <label for="email">Email professionnel</label>
-      <input
-        id="email"
-        class="input"
-        type="email"
-        placeholder="prenom.nom@societe.ci"
-        autocomplete="username"
-        inputmode="email"
-      />
-
-      <label for="password">Mot de passe</label>
-      <input
-        id="password"
-        class="input"
-        type="password"
-        placeholder="••••••••"
-        autocomplete="current-password"
-      />
-
-      <div class="row">
-        <label class="remember">
-          <input id="remember" type="checkbox" />
-          <span>Se souvenir de moi</span>
-        </label>
-
-        <a class="link" href="#" id="forgotLink">Mot de passe oublié ?</a>
-      </div>
-
-      <button class="btn btn-primary" id="btnLogin" type="button">
-        Connexion
-      </button>
-
-      <button class="btn btn-secondary" id="btnRegister" type="button">
-        Créer un compte
-      </button>
-
-      <p id="msg" class="msg" aria-live="polite"></p>
-    </section>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    © 2025 DGPE – Direction Générale du Portefeuille de l’État
-  </footer>
-
-  <!-- POPUP (facultatif) -->
-  <div id="popup-overlay" class="popup-overlay hidden">
-    <div class="popup-card">
-      <h3 id="popup-title"></h3>
-      <p id="popup-message"></p>
-      <button class="btn btn-primary" type="button" onclick="closePopup()">OK</button>
+<header class="navbar-login">
+  <div class="wrap">
+    <div class="logo-group">
+      <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+      <span class="brand">e-Learning</span>
     </div>
   </div>
+</header>
 
-  <!-- SUPABASE -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<section class="hero hero-login">
+  <div class="inner">
+    <h1>Connexion</h1>
+    <p>Accès réservé aux utilisateurs autorisés</p>
+  </div>
+</section>
 
-  <script>
-    /* ================= SUPABASE CONFIG ================= */
-    const SUPABASE_URL = "https://hrriedjmpwjfmfimqlmx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<main class="login-wrap">
+  <section class="login-card">
+    <h2>Accès à la plateforme</h2>
 
-    /* ================= UI ================= */
-    const emailEl = document.getElementById("email");
-    const passEl  = document.getElementById("password");
-    const msgEl   = document.getElementById("msg");
-    const btnLogin = document.getElementById("btnLogin");
-    const btnRegister = document.getElementById("btnRegister");
-    const forgotLink = document.getElementById("forgotLink");
+    <label>Email professionnel</label>
+    <input id="email" class="input" type="email" placeholder="prenom.nom@dgpe.gouv.ci">
 
-    function setMsg(text, ok = true) {
-      msgEl.textContent = text || "";
-      msgEl.classList.toggle("error", !ok);
-    }
+    <label>Mot de passe</label>
+    <input id="password" class="input" type="password">
 
-    function showPopup(title, message) {
-      document.getElementById("popup-title").innerText = title;
-      document.getElementById("popup-message").innerText = message;
-      document.getElementById("popup-overlay").classList.remove("hidden");
-    }
+    <div class="row">
+      <label><input type="checkbox"> Se souvenir de moi</label>
+      <a href="#" id="forgotLink">Mot de passe oublié ?</a>
+    </div>
 
-    function closePopup() {
-      document.getElementById("popup-overlay").classList.add("hidden");
-    }
-    window.closePopup = closePopup;
+    <button class="btn btn-primary" id="btnLogin">Connexion</button>
+    <button class="btn btn-secondary" id="btnRegister">Créer un compte</button>
 
-    /* ================= LOGIN ================= */
-    async function loginUser() {
-      const email = (emailEl.value || "").trim();
-      const password = (passEl.value || "").trim();
+    <!-- ✅ MESSAGE ADMIN DGPE -->
+    <p id="msg" class="msg"></p>
+  </section>
+</main>
 
-      if (!email || !password) {
-        setMsg("Veuillez remplir tous les champs.", false);
-        return;
-      }
+<footer class="footer">
+  © 2025 DGPE – Direction Générale du Portefeuille de l’État
+</footer>
 
-      btnLogin.disabled = true;
-      setMsg("Connexion en cours…");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+<script>
+/* ================= SUPABASE ================= */
+const supabase = window.supabase.createClient(
+  "https://hrriedjmpwjfmfimqlmx.supabase.co",
+  "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V"
+);
 
-      if (error) {
-        btnLogin.disabled = false;
-        setMsg("Identifiants incorrects ou compte non confirmé.", false);
-        return;
-      }
+/* ================= UI ================= */
+const emailEl = document.getElementById("email");
+const passEl  = document.getElementById("password");
+const msgEl   = document.getElementById("msg");
+const btnLogin = document.getElementById("btnLogin");
 
-      setMsg("Connexion réussie. Redirection…");
-      setTimeout(() => (window.location.href = "dashboard.html"), 600);
-    }
+function showMsg(text, type="info") {
+  msgEl.textContent = text;
+  msgEl.className = "msg " + type;
+}
 
-    /* ================= REGISTER ================= */
-    function goRegister() {
-      window.location.href = "register.html";
-    }
+/* ================= LOGIN DGPE ================= */
+btnLogin.onclick = async () => {
 
-    /* ================= FORGOT ================= */
-    async function forgotPassword() {
-      const email = (emailEl.value || "").trim();
-      if (!email) {
-        showPopup("Mot de passe oublié", "Saisissez d’abord votre email professionnel.");
-        return;
-      }
+  const email = emailEl.value.trim();
+  const password = passEl.value.trim();
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://dgpe-hub.github.io/DGPE-E-LEARNING-PLATFORM/login.html"
-      });
+  if (!email || !password) {
+    showMsg("❌ Veuillez remplir tous les champs.", "error");
+    return;
+  }
 
-      if (error) {
-        showPopup("Erreur", error.message);
-      } else {
-        showPopup("Email envoyé", "Consultez votre boîte mail pour réinitialiser le mot de passe.");
-      }
-    }
+  showMsg("Connexion en cours…");
 
-    btnLogin.addEventListener("click", loginUser);
-    btnRegister.addEventListener("click", goRegister);
-    forgotLink.addEventListener("click", (e) => { e.preventDefault(); forgotPassword(); });
+  // 1️⃣ Auth Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    // Entrée = login
-    passEl.addEventListener("keydown", (e) => { if (e.key === "Enter") loginUser(); });
-  </script>
+  if (error) {
+    showMsg("❌ Identifiants incorrects.", "error");
+    return;
+  }
+
+  // 2️⃣ Vérification métier DGPE (TABLE USERS)
+  const { data: profile, error: profileError } = await supabase
+    .from("users")
+    .select("status, role")
+    .eq("email", email)
+    .single();
+
+  if (profileError || !profile) {
+    showMsg("⛔ Compte non reconnu par l’administration DGPE.", "error");
+    return;
+  }
+
+  // 3️⃣ STATUT
+  if (profile.status === "PENDING") {
+    showMsg("⏳ Votre compte est en attente de validation par l’administrateur.", "warning");
+    return;
+  }
+
+  if (profile.status !== "ACTIF") {
+    showMsg("⛔ Compte désactivé. Contactez l’administration.", "error");
+    return;
+  }
+
+  // 4️⃣ OK
+  showMsg("✅ Connexion autorisée. Redirection…", "success");
+
+  setTimeout(() => {
+    window.location.href = "dashboard.html";
+  }, 800);
+};
+
+/* ================= AUTRES ================= */
+document.getElementById("btnRegister").onclick = () =>
+  window.location.href = "register.html";
+
+document.getElementById("forgotLink").onclick = async (e) => {
+  e.preventDefault();
+  if (!emailEl.value) {
+    alert("Saisissez votre email professionnel.");
+    return;
+  }
+  await supabase.auth.resetPasswordForEmail(emailEl.value);
+  alert("Email de réinitialisation envoyé.");
+};
+</script>
 
 </body>
 </html>
