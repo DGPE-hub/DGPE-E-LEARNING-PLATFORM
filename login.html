@@ -1,189 +1,180 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Connexion – DGPE</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=20251219-1" />
 </head>
 
 <body class="login-page">
 
-<!-- ================= NAVBAR ================= -->
-<div class="navbar-login">
-  <div class="wrap">
-    <div class="logo-group">
-      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
-      <span class="brand">e-Learning</span>
+  <!-- NAVBAR -->
+  <header class="navbar-login">
+    <div class="wrap">
+      <div class="logo-group">
+        <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+        <span class="brand">e-Learning</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero hero-login">
+    <div class="inner">
+      <h1>Connexion</h1>
+      <p>Accès réservé aux utilisateurs autorisés</p>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <main class="login-wrap">
+    <section class="login-card" aria-label="Formulaire de connexion">
+      <h2>Accès à la plateforme</h2>
+
+      <label for="email">Email professionnel</label>
+      <input
+        id="email"
+        class="input"
+        type="email"
+        placeholder="prenom.nom@societe.ci"
+        autocomplete="username"
+        inputmode="email"
+      />
+
+      <label for="password">Mot de passe</label>
+      <input
+        id="password"
+        class="input"
+        type="password"
+        placeholder="••••••••"
+        autocomplete="current-password"
+      />
+
+      <div class="row">
+        <label class="remember">
+          <input id="remember" type="checkbox" />
+          <span>Se souvenir de moi</span>
+        </label>
+
+        <a class="link" href="#" id="forgotLink">Mot de passe oublié ?</a>
+      </div>
+
+      <button class="btn btn-primary" id="btnLogin" type="button">
+        Connexion
+      </button>
+
+      <button class="btn btn-secondary" id="btnRegister" type="button">
+        Créer un compte
+      </button>
+
+      <p id="msg" class="msg" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    © 2025 DGPE – Direction Générale du Portefeuille de l’État
+  </footer>
+
+  <!-- POPUP (facultatif) -->
+  <div id="popup-overlay" class="popup-overlay hidden">
+    <div class="popup-card">
+      <h3 id="popup-title"></h3>
+      <p id="popup-message"></p>
+      <button class="btn btn-primary" type="button" onclick="closePopup()">OK</button>
     </div>
   </div>
-</div>
 
-<!-- ================= TITRE ================= -->
-<section class="hero" style="background:none;min-height:auto;padding-top:60px;text-align:center">
-  <div class="inner">
-    <h1>Connexion</h1>
-    <p>Accès réservé aux administrateurs des sociétés</p>
-  </div>
-</section>
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ================= FORMULAIRE ================= -->
-<div class="login-wrap">
-  <div class="login-card">
-    <h2>Accès à la plateforme</h2>
+  <script>
+    /* ================= SUPABASE CONFIG ================= */
+    const SUPABASE_URL = "https://hrriedjmpwjfmfimqlmx.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <label>Email professionnel</label>
-    <input
-      id="email"
-      class="input"
-      type="email"
-      placeholder="prenom.nom@societe.ci"
-      autocomplete="email"
-    >
+    /* ================= UI ================= */
+    const emailEl = document.getElementById("email");
+    const passEl  = document.getElementById("password");
+    const msgEl   = document.getElementById("msg");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnRegister = document.getElementById("btnRegister");
+    const forgotLink = document.getElementById("forgotLink");
 
-    <label>Mot de passe</label>
-    <input
-      id="password"
-      class="input"
-      type="password"
-      placeholder="••••••••"
-      autocomplete="current-password"
-    >
-
-    <div class="row">
-      <label>
-        <input type="checkbox"> Se souvenir de moi
-      </label>
-      <a href="#">Mot de passe oublié ?</a>
-    </div>
-
-    <button class="btn btn-primary" onclick="loginUser()">Connexion</button>
-    <br><br>
-    <button class="btn btn-secondary" onclick="registerUser()">Créer un compte</button>
-  </div>
-</div>
-
-<!-- ================= FOOTER ================= -->
-<footer class="footer">
-© 2025 DGPE – Direction Générale du Portefeuille de l’État
-</footer>
-
-<!-- ================= POPUP ================= -->
-<div id="popup-overlay" class="popup-overlay hidden">
-  <div class="popup-card">
-    <h3 id="popup-title"></h3>
-    <p id="popup-message"></p>
-    <button onclick="closePopup()">OK</button>
-  </div>
-</div>
-
-<!-- ================= SUPABASE SDK ================= -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-/* =====================================================
-   SUPABASE CONFIG
-===================================================== */
-const SUPABASE_URL = "https://hrriedjmpwjfmfimqlmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V";
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-/* =====================================================
-   POPUP
-===================================================== */
-function showPopup(title, message) {
-  document.getElementById("popup-title").innerText = title;
-  document.getElementById("popup-message").innerText = message;
-  document.getElementById("popup-overlay").classList.remove("hidden");
-}
-
-function closePopup() {
-  document.getElementById("popup-overlay").classList.add("hidden");
-}
-
-/* =====================================================
-   CONNEXION
-===================================================== */
-async function loginUser() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    showPopup("Erreur", "Veuillez remplir tous les champs.");
-    return;
-  }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    showPopup(
-      "Connexion refusée",
-      "Identifiants incorrects ou compte non confirmé."
-    );
-    return;
-  }
-
-  showPopup("Connexion réussie", "Bienvenue sur la plateforme DGPE.");
-
-  setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 1000);
-}
-
-/* =====================================================
-   INSCRIPTION (SUPABASE EMAIL CONFIRMATION)
-===================================================== */
-async function registerUser() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    showPopup("Erreur", "Veuillez remplir tous les champs.");
-    return;
-  }
-
-  // ❌ Bloquer emails personnels
-  const forbiddenDomains = [
-    "@gmail.com",
-    "@yahoo.com",
-    "@hotmail.com",
-    "@outlook.com"
-  ];
-
-  if (forbiddenDomains.some(d => email.toLowerCase().endsWith(d))) {
-    showPopup(
-      "Email non autorisé",
-      "Veuillez utiliser votre email professionnel de société."
-    );
-    return;
-  }
-
-  // ✅ SUPABASE SIGN UP + EMAIL CONFIRMATION
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo:
-        "https://dgpe-hub.github.io/DGPE-E-LEARNING-PLATFORM/login.html"
+    function setMsg(text, ok = true) {
+      msgEl.textContent = text || "";
+      msgEl.classList.toggle("error", !ok);
     }
-  });
 
-  if (error) {
-    showPopup("Erreur inscription", error.message);
-  } else {
-    showPopup(
-      "Compte créé",
-      "Un email de confirmation vous a été envoyé. Veuillez confirmer votre compte avant de vous connecter."
-    );
-  }
-}
-</script>
+    function showPopup(title, message) {
+      document.getElementById("popup-title").innerText = title;
+      document.getElementById("popup-message").innerText = message;
+      document.getElementById("popup-overlay").classList.remove("hidden");
+    }
+
+    function closePopup() {
+      document.getElementById("popup-overlay").classList.add("hidden");
+    }
+    window.closePopup = closePopup;
+
+    /* ================= LOGIN ================= */
+    async function loginUser() {
+      const email = (emailEl.value || "").trim();
+      const password = (passEl.value || "").trim();
+
+      if (!email || !password) {
+        setMsg("Veuillez remplir tous les champs.", false);
+        return;
+      }
+
+      btnLogin.disabled = true;
+      setMsg("Connexion en cours…");
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        btnLogin.disabled = false;
+        setMsg("Identifiants incorrects ou compte non confirmé.", false);
+        return;
+      }
+
+      setMsg("Connexion réussie. Redirection…");
+      setTimeout(() => (window.location.href = "dashboard.html"), 600);
+    }
+
+    /* ================= REGISTER ================= */
+    function goRegister() {
+      window.location.href = "register.html";
+    }
+
+    /* ================= FORGOT ================= */
+    async function forgotPassword() {
+      const email = (emailEl.value || "").trim();
+      if (!email) {
+        showPopup("Mot de passe oublié", "Saisissez d’abord votre email professionnel.");
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://dgpe-hub.github.io/DGPE-E-LEARNING-PLATFORM/login.html"
+      });
+
+      if (error) {
+        showPopup("Erreur", error.message);
+      } else {
+        showPopup("Email envoyé", "Consultez votre boîte mail pour réinitialiser le mot de passe.");
+      }
+    }
+
+    btnLogin.addEventListener("click", loginUser);
+    btnRegister.addEventListener("click", goRegister);
+    forgotLink.addEventListener("click", (e) => { e.preventDefault(); forgotPassword(); });
+
+    // Entrée = login
+    passEl.addEventListener("keydown", (e) => { if (e.key === "Enter") loginUser(); });
+  </script>
 
 </body>
 </html>
