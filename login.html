@@ -3,37 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Connexion – DGPE</title>
+  <title>Dashboard – DGPE</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body class="login-page">
-
-<div class="navbar-login">
+<!-- NAVBAR PRIVÉE -->
+<header class="navbar">
   <div class="wrap">
     <div class="logo-group">
-      <img src="assets/img/dgpe-logo.png" class="logo">
+      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
       <span class="brand">e-Learning</span>
     </div>
+
+    <nav class="nav hidden" id="nav-private">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html">Catalogue</a>
+      <a href="modules.html">Modules</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="administration.html" id="adminLink">Administration</a>
+      <a href="#" id="logoutBtn" class="pill">Déconnexion</a>
+    </nav>
   </div>
-</div>
+</header>
 
-<div class="login-wrap">
-  <div class="login-card">
-    <h2>Connexion</h2>
+<main class="page">
+  <section class="panel">
+    <h2>Tableau de bord</h2>
 
-    <label>Email professionnel</label>
-    <input id="email" class="input" type="email" placeholder="prenom.nom@dgpe.gouv.ci">
+    <div class="cards">
+      <div class="card">
+        <h3>Modules suivis</h3>
+        <p><strong id="kpi-modules">—</strong></p>
+      </div>
 
-    <label>Mot de passe</label>
-    <input id="password" class="input" type="password">
+      <div class="card">
+        <h3>Heures de formation</h3>
+        <p><strong id="kpi-heures">—</strong></p>
+      </div>
 
-    <button class="btn btn-primary" onclick="login()">Se connecter</button>
+      <div class="card">
+        <h3>Certifications</h3>
+        <p><strong id="kpi-certifs">—</strong></p>
+      </div>
+    </div>
 
-    <p id="msg"></p>
-  </div>
-</div>
+    <p id="msg" class="msg" style="margin-top:14px"></p>
+  </section>
+</main>
 
+<footer class="footer">
+  © 2025 DGPE – Direction Générale du Portefeuille de l’État
+</footer>
+
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
@@ -41,25 +64,68 @@ const supabaseClient = supabase.createClient(
   "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V"
 );
 
-async function login() {
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const password = document.getElementById("password").value.trim();
-  const msg = document.getElementById("msg");
+const msg = document.getElementById("msg");
+const adminLink = document.getElementById("adminLink");
+const kpiModules = document.getElementById("kpi-modules");
+const kpiHeures  = document.getElementById("kpi-heures");
+const kpiCertifs = document.getElementById("kpi-certifs");
 
-  if (!email || !password) {
-    msg.textContent = "Veuillez remplir tous les champs.";
-    return;
-  }
-
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    msg.textContent = "Identifiants incorrects.";
-    return;
-  }
-
-  window.location.href = "dashboard.html";
+function showMsg(t, type="info"){
+  msg.textContent = t;
+  msg.style.color = (type==="error") ? "#c62828" : (type==="success") ? "#2e7d32" : "#333";
 }
+
+async function signOutToLogin(){
+  await supabaseClient.auth.signOut();
+  location.replace("login.html");
+}
+
+/* ===================== GUARD DGPE ===================== */
+async function guardDGPE(){
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+  if (error || !user) return location.replace("login.html");
+
+  // rendre la navbar visible
+  document.getElementById("nav-private").classList.remove("hidden");
+
+  // profil DGPE (table users)
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("users")
+    .select("status, role")
+    .eq("email", user.email)
+    .single();
+
+  if (profileError || !profile){
+    showMsg("Compte non reconnu DGPE. Contactez l'administration.", "error");
+    return signOutToLogin();
+  }
+
+  if (profile.status !== "ACTIF"){
+    showMsg("Compte en attente / désactivé. Validation admin requise.", "error");
+    return signOutToLogin();
+  }
+
+  // Masquer lien admin si non ADMIN
+  if (profile.role !== "ADMIN"){
+    adminLink.style.display = "none";
+  }
+
+  // charger KPI (placeholder)
+  // TODO: brancher vos vraies tables inscriptions/certifs
+  kpiModules.textContent = "3";
+  kpiHeures.textContent  = "12 h";
+  kpiCertifs.textContent = "1";
+
+  showMsg("Accès autorisé.", "success");
+}
+
+/* ===================== LOGOUT ===================== */
+document.getElementById("logoutBtn").addEventListener("click", async (e)=>{
+  e.preventDefault();
+  await signOutToLogin();
+});
+
+guardDGPE();
 </script>
 
 </body>
