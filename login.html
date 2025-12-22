@@ -2,32 +2,53 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Connexion – DGPE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion – DGPE e-Learning</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<header class="navbar">
+<body class="login-page">
+
+<!-- ================= NAVBAR LOGIN ================= -->
+<header class="navbar navbar-login">
   <div class="wrap">
     <div class="logo-group">
-      <img src="assets/img/dgpe-logo.png" class="logo">
+      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
       <span class="brand">e-Learning</span>
     </div>
   </div>
 </header>
 
-<main class="page login">
-  <form id="loginForm" class="card">
-    <h2>Connexion</h2>
-    <input id="email" type="email" placeholder="Email DGPE" required>
-    <input id="password" type="password" placeholder="Mot de passe" required>
-    <button class="btn">Se connecter</button>
-    <p id="error" class="error"></p>
-  </form>
-</main>
+<!-- ================= HERO LOGIN ================= -->
+<section class="login-hero">
+  <div class="login-card">
 
-<footer class="footer">© 2025 DGPE</footer>
+    <h2>Se connecter</h2>
 
+    <form id="loginForm">
+      <label>Email professionnel</label>
+      <input id="email" type="email" placeholder="prenom.nom@dgpe.gouv.ci" required>
+
+      <label>Mot de passe</label>
+      <input id="password" type="password" placeholder="••••••••" required>
+
+      <div class="login-options">
+        <label>
+          <input type="checkbox"> Se souvenir de moi
+        </label>
+        <a href="#">Mot de passe oublié ?</a>
+      </div>
+
+      <button class="btn primary">Connexion</button>
+      <button type="button" class="btn outline">Créer un compte</button>
+
+      <p id="loginError" class="error"></p>
+    </form>
+
+  </div>
+</section>
+
+<!-- ================= SUPABASE ================= -->
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -36,16 +57,25 @@ const supabase = createClient(
   "sb_publishable_GbNaiadaYRtF0WhOjiPp2w_ww7jVANw"
 );
 
-document.getElementById("loginForm").onsubmit = async (e) => {
+const form = document.getElementById("loginForm");
+const errorBox = document.getElementById("loginError");
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = email.value;
+  errorBox.textContent = "";
+
+  const email = email.value.trim();
   const password = password.value;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return errorBox.textContent = "Identifiants incorrects";
 
-  location.href = "dashboard.html";
-};
+  if (error) {
+    errorBox.textContent = "❌ Identifiants incorrects";
+    return;
+  }
+
+  window.location.href = "dashboard.html";
+});
 </script>
 
 </body>
