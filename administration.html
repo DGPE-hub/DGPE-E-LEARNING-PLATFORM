@@ -4,75 +4,226 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Administration – DGPE</title>
-
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- ================= NAVBAR ================= -->
-<div class="navbar">
+<!-- NAVBAR PRIVÉE -->
+<header class="navbar">
   <div class="wrap">
     <div class="logo-group">
-      <img src="./assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
       <span class="brand">e-Learning</span>
     </div>
 
-    <nav class="nav">
+    <nav class="nav hidden" id="nav-private">
       <a href="index.html">Accueil</a>
       <a href="catalogue.html">Catalogue</a>
-      <a href="module.html">Modules</a>
+      <a href="modules.html">Modules</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="administration.html" class="active">Administration</a>
-      <a href="login.html" class="pill">Déconnexion</a>
+      <a href="#" id="logoutBtn" class="pill">Déconnexion</a>
     </nav>
   </div>
-</div>
+</header>
 
-<!-- ================= HERO ADMIN ================= -->
-<section class="hero stripes">
-  <div class="inner">
-    <h1>Administration</h1>
-    <p>Gestion des utilisateurs, du catalogue et des inscriptions</p>
-  </div>
-</section>
+<main class="page">
+  <section class="panel">
+    <h2>Administration</h2>
+    <p class="muted">Validation et gestion des comptes DGPE.</p>
 
-<!-- ================= CONTENU ADMIN ================= -->
-<div class="page">
-
-  <div class="cards">
-
-    <!-- UTILISATEURS -->
-    <div class="card">
-      <h3>👤 Utilisateurs</h3>
-      <p>Créer, modifier ou désactiver des comptes</p>
-      <a href="users.html" class="btn">Gérer</a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 10px 0 14px;">
+      <input id="search" class="input" placeholder="Rechercher par email..." style="max-width:320px">
+      <select id="filterStatus" class="input" style="max-width:220px">
+        <option value="">Tous statuts</option>
+        <option value="PENDING">PENDING</option>
+        <option value="ACTIF">ACTIF</option>
+        <option value="DESACTIVE">DESACTIVE</option>
+      </select>
+      <button class="btn" id="btnReload">Rafraîchir</button>
     </div>
 
-    <!-- CATALOGUE -->
-    <div class="card">
-      <h3>📚 Catalogue</h3>
-      <p>Gérer les modules et domaines de formation</p>
-      <a href="catalogue.html" class="btn">Accéder</a>
+    <p id="msg" class="msg"></p>
+
+    <div id="tableWrap" style="overflow:auto; margin-top:10px;">
+      <table class="table" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:10px;">Email</th>
+            <th style="text-align:left; padding:10px;">Statut</th>
+            <th style="text-align:left; padding:10px;">Rôle</th>
+            <th style="text-align:left; padding:10px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td style="padding:10px;" colspan="4">Chargement…</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- INSCRIPTIONS -->
-    <div class="card">
-      <h3>📝 Inscriptions</h3>
-      <p>Suivre les inscriptions aux formations</p>
-      <a href="inscriptions.html" class="btn">Voir le tableau</a>
-    </div>
+    <p class="muted" style="margin-top:12px;font-size:13px;">
+      ⚠️ Sécurité: les mises à jour doivent être protégées par RLS (voir SQL ci-dessous).
+    </p>
+  </section>
+</main>
 
-    <!-- SESSIONS -->
-    <div class="card">
-      <h3>🗓️ Sessions</h3>
-      <p>Planifier et suivre les sessions</p>
-      <a href="sessions.html" class="btn">Planifier</a>
-    </div>
+<footer class="footer">
+  © 2025 DGPE – Direction Générale du Portefeuille de l’État
+</footer>
 
-  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = supabase.createClient(
+  "https://hrriedjmpwjfmfimqlmx.supabase.co",
+  "sb_publishable_1AnZMUSy3A4X8xIrKJOKQw_cOX40j9V"
+);
 
-</div>
+const msg = document.getElementById("msg");
+const tbody = document.getElementById("tbody");
+const search = document.getElementById("search");
+const filterStatus = document.getElementById("filterStatus");
+
+function showMsg(t, type="info"){
+  msg.textContent = t;
+  msg.style.color = (type==="error") ? "#c62828" : (type==="success") ? "#2e7d32" : "#333";
+}
+
+async function signOutToLogin(){
+  await supabaseClient.auth.signOut();
+  location.replace("login.html");
+}
+
+/* ===================== GUARD ADMIN ===================== */
+async function guardAdmin(){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return location.replace("login.html");
+
+  document.getElementById("nav-private").classList.remove("hidden");
+
+  const { data: profile } = await supabaseClient
+    .from("users")
+    .select("status, role")
+    .eq("email", user.email)
+    .single();
+
+  if (!profile || profile.status !== "ACTIF") return signOutToLogin();
+
+  if (profile.role !== "ADMIN") {
+    showMsg("Accès refusé : vous n'êtes pas administrateur.", "error");
+    setTimeout(()=>location.replace("dashboard.html"), 800);
+    return;
+  }
+
+  await loadUsers();
+}
+
+/* ===================== LOAD USERS ===================== */
+async function loadUsers(){
+  showMsg("Chargement…");
+  tbody.innerHTML = `<tr><td style="padding:10px" colspan="4">Chargement…</td></tr>`;
+
+  let q = supabaseClient
+    .from("users")
+    .select("email,status,role")
+    .order("email", { ascending:true });
+
+  const s = search.value.trim().toLowerCase();
+  if (s) q = q.ilike("email", `%${s}%`);
+
+  const st = filterStatus.value.trim();
+  if (st) q = q.eq("status", st);
+
+  const { data, error } = await q;
+
+  if (error){
+    console.error(error);
+    showMsg("Erreur de chargement (RLS ?). Voir SQL sécurité.", "error");
+    return;
+  }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr><td style="padding:10px" colspan="4">Aucun résultat.</td></tr>`;
+    showMsg("OK", "success");
+    return;
+  }
+
+  tbody.innerHTML = data.map(u => `
+    <tr>
+      <td style="padding:10px;">${u.email || ""}</td>
+      <td style="padding:10px;">
+        <span>${u.status || ""}</span>
+      </td>
+      <td style="padding:10px;">
+        <select data-email="${u.email}" class="roleSel input" style="max-width:140px">
+          <option value="USER" ${u.role==="USER"?"selected":""}>USER</option>
+          <option value="ADMIN" ${u.role==="ADMIN"?"selected":""}>ADMIN</option>
+        </select>
+      </td>
+      <td style="padding:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn" onclick="setStatus('${u.email}','ACTIF')">ACTIVER</button>
+        <button class="btn" onclick="setStatus('${u.email}','PENDING')">PENDING</button>
+        <button class="btn" onclick="setStatus('${u.email}','DESACTIVE')">DESACTIVER</button>
+        <button class="btn" onclick="saveRole('${u.email}')">Enregistrer rôle</button>
+      </td>
+    </tr>
+  `).join("");
+
+  showMsg("Liste chargée.", "success");
+}
+
+/* ===================== UPDATE STATUS ===================== */
+async function setStatus(email, status){
+  showMsg("Mise à jour en cours…");
+
+  const { error } = await supabaseClient
+    .from("users")
+    .update({ status })
+    .eq("email", email);
+
+  if (error){
+    console.error(error);
+    showMsg("Impossible de modifier (RLS ?). Appliquer le SQL sécurité.", "error");
+    return;
+  }
+
+  showMsg(`Statut mis à jour : ${status}`, "success");
+  await loadUsers();
+}
+
+/* ===================== UPDATE ROLE ===================== */
+async function saveRole(email){
+  const sel = document.querySelector(`select.roleSel[data-email="${email}"]`);
+  const role = sel ? sel.value : "USER";
+
+  showMsg("Mise à jour du rôle…");
+
+  const { error } = await supabaseClient
+    .from("users")
+    .update({ role })
+    .eq("email", email);
+
+  if (error){
+    console.error(error);
+    showMsg("Impossible de modifier rôle (RLS ?). Appliquer le SQL sécurité.", "error");
+    return;
+  }
+
+  showMsg("Rôle mis à jour.", "success");
+  await loadUsers();
+}
+
+/* ===================== EVENTS ===================== */
+document.getElementById("btnReload").addEventListener("click", loadUsers);
+search.addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadUsers(); });
+filterStatus.addEventListener("change", loadUsers);
+
+document.getElementById("logoutBtn").addEventListener("click", async (e)=>{
+  e.preventDefault();
+  await signOutToLogin();
+});
+
+guardAdmin();
+</script>
 
 </body>
 </html>
