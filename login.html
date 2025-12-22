@@ -3,60 +3,44 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dashboard – DGPE</title>
+  <title>Connexion – DGPE</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<!-- NAVBAR PRIVÉE -->
-<header class="navbar">
+<body class="login-page">
+
+<header class="navbar-login">
   <div class="wrap">
-    <div class="logo-group">
-      <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
-      <span class="brand">e-Learning</span>
-    </div>
-
-    <nav class="nav hidden" id="nav-private">
-      <a href="index.html">Accueil</a>
-      <a href="catalogue.html">Catalogue</a>
-      <a href="modules.html">Modules</a>
-      <a href="dashboard.html" class="active">Dashboard</a>
-      <a href="administration.html" id="adminLink">Administration</a>
-      <a href="#" id="logoutBtn" class="pill">Déconnexion</a>
-    </nav>
+    <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
+    <span class="brand">e-Learning</span>
   </div>
 </header>
 
-<main class="page">
-  <section class="panel">
-    <h2>Tableau de bord</h2>
+<div class="login-wrap">
+  <div class="login-card">
+    <h2>Connexion</h2>
 
-    <div class="cards">
-      <div class="card">
-        <h3>Modules suivis</h3>
-        <p><strong id="kpi-modules">—</strong></p>
-      </div>
+    <input id="email" class="input"
+           placeholder="prenom.nom@dgpe.gouv.ci">
 
-      <div class="card">
-        <h3>Heures de formation</h3>
-        <p><strong id="kpi-heures">—</strong></p>
-      </div>
+    <input id="password" class="input" type="password"
+           placeholder="Mot de passe">
 
-      <div class="card">
-        <h3>Certifications</h3>
-        <p><strong id="kpi-certifs">—</strong></p>
-      </div>
-    </div>
+    <button class="btn btn-primary" onclick="login()">Se connecter</button>
+    <button class="btn btn-secondary" onclick="register()">Créer un compte</button>
 
-    <p id="msg" class="msg" style="margin-top:14px"></p>
-  </section>
-</main>
+    <p class="muted">
+      Accès soumis à validation de l’administrateur DGPE
+    </p>
+
+    <p id="msg"></p>
+  </div>
+</div>
 
 <footer class="footer">
   © 2025 DGPE – Direction Générale du Portefeuille de l’État
 </footer>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = supabase.createClient(
@@ -65,67 +49,49 @@ const supabaseClient = supabase.createClient(
 );
 
 const msg = document.getElementById("msg");
-const adminLink = document.getElementById("adminLink");
-const kpiModules = document.getElementById("kpi-modules");
-const kpiHeures  = document.getElementById("kpi-heures");
-const kpiCertifs = document.getElementById("kpi-certifs");
 
-function showMsg(t, type="info"){
-  msg.textContent = t;
-  msg.style.color = (type==="error") ? "#c62828" : (type==="success") ? "#2e7d32" : "#333";
-}
+function show(t,c="#333"){ msg.textContent=t; msg.style.color=c; }
 
-async function signOutToLogin(){
-  await supabaseClient.auth.signOut();
-  location.replace("login.html");
-}
+/* 🚫 AUCUNE REDIRECTION ICI */
+async function login(){
+  const email = emailInput().toLowerCase();
+  const password = passwordInput();
 
-/* ===================== GUARD DGPE ===================== */
-async function guardDGPE(){
-  const { data: { user }, error } = await supabaseClient.auth.getUser();
-  if (error || !user) return location.replace("login.html");
+  if(!email || !password) return show("Champs obligatoires","#c62828");
+  if(!email.endsWith("@dgpe.gouv.ci")) return show("Email DGPE requis","#c62828");
 
-  // rendre la navbar visible
-  document.getElementById("nav-private").classList.remove("hidden");
+  show("Connexion…");
 
-  // profil DGPE (table users)
-  const { data: profile, error: profileError } = await supabaseClient
-    .from("users")
-    .select("status, role")
-    .eq("email", user.email)
-    .single();
+  const { error } = await supabaseClient.auth.signInWithPassword({email,password});
+  if(error) return show("Connexion refusée","#c62828");
 
-  if (profileError || !profile){
-    showMsg("Compte non reconnu DGPE. Contactez l'administration.", "error");
-    return signOutToLogin();
+  // Vérification DGPE
+  const { data } = await supabaseClient
+    .from("users").select("status").eq("email",email).single();
+
+  if(!data || data.status!=="ACTIF"){
+    await supabaseClient.auth.signOut();
+    return show("Compte non validé par l’admin","#c62828");
   }
 
-  if (profile.status !== "ACTIF"){
-    showMsg("Compte en attente / désactivé. Validation admin requise.", "error");
-    return signOutToLogin();
-  }
-
-  // Masquer lien admin si non ADMIN
-  if (profile.role !== "ADMIN"){
-    adminLink.style.display = "none";
-  }
-
-  // charger KPI (placeholder)
-  // TODO: brancher vos vraies tables inscriptions/certifs
-  kpiModules.textContent = "3";
-  kpiHeures.textContent  = "12 h";
-  kpiCertifs.textContent = "1";
-
-  showMsg("Accès autorisé.", "success");
+  location.href="dashboard.html";
 }
 
-/* ===================== LOGOUT ===================== */
-document.getElementById("logoutBtn").addEventListener("click", async (e)=>{
-  e.preventDefault();
-  await signOutToLogin();
-});
+async function register(){
+  const email = emailInput().toLowerCase();
+  const password = passwordInput();
 
-guardDGPE();
+  if(!email || !password) return show("Champs obligatoires","#c62828");
+  if(!email.endsWith("@dgpe.gouv.ci")) return show("Email DGPE requis","#c62828");
+
+  const { error } = await supabaseClient.auth.signUp({email,password});
+  if(error) return show("Erreur inscription","#c62828");
+
+  show("Compte créé. Validation admin requise.","#2e7d32");
+}
+
+function emailInput(){return document.getElementById("email").value.trim();}
+function passwordInput(){return document.getElementById("password").value.trim();}
 </script>
 
 </body>
