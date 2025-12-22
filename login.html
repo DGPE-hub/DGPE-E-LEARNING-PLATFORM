@@ -9,6 +9,7 @@
 
 <body class="login-page">
 
+<!-- ================= HEADER ================= -->
 <header class="navbar-login">
   <div class="wrap">
     <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
@@ -16,6 +17,7 @@
   </div>
 </header>
 
+<!-- ================= LOGIN CARD ================= -->
 <div class="login-wrap">
   <div class="login-card">
 
@@ -29,8 +31,13 @@
     <input id="password" class="input" type="password"
            placeholder="••••••••">
 
-    <button class="btn btn-primary" onclick="login()">Se connecter</button>
-    <button class="btn btn-secondary" onclick="register()">Créer un compte</button>
+    <button id="btnLogin" class="btn btn-primary">
+      Se connecter
+    </button>
+
+    <button id="btnRegister" class="btn btn-secondary">
+      Créer un compte
+    </button>
 
     <p class="muted" style="text-align:center;margin-top:10px">
       Accès soumis à validation de l’administrateur DGPE
@@ -45,49 +52,50 @@
   © 2025 DGPE – Direction Générale du Portefeuille de l’État
 </footer>
 
+<!-- ================= SUPABASE ================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ================= SUPABASE CONFIG ================= */
-const SUPABASE_URL = "https://rwjyxmzdwdddjaeghpae.supabase.co";
-const SUPABASE_KEY = "sb_publishable_GbNaiadaYRtF0WhOjiPp2w_ww7jVANw";
+/* ================= CONFIG SUPABASE ================= */
+const supabaseClient = supabase.createClient(
+  "https://rwjyxmzdwdddjaeghpae.supabase.co",
+  "sb_publishable_GbNaiadaYRtF0WhOjiPp2w_ww7jVANw"
+);
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ================= UI HELPERS ================= */
+/* ================= ELEMENTS ================= */
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 const msg = document.getElementById("msg");
-function show(t, type="info"){
-  msg.textContent = t;
+const btnLogin = document.getElementById("btnLogin");
+const btnRegister = document.getElementById("btnRegister");
+
+function show(text, type="info"){
+  msg.textContent = text;
   msg.className = "msg " + type;
 }
-function emailInput(){ return document.getElementById("email").value.trim().toLowerCase(); }
-function passwordInput(){ return document.getElementById("password").value.trim(); }
 
 /* ================= LOGIN ================= */
-window.login = async function(){
-  const email = emailInput();
-  const password = passwordInput();
+async function login(){
+  const email = emailInput.value.trim().toLowerCase();
+  const password = passwordInput.value.trim();
 
-  if(!email || !password) return show("Veuillez remplir tous les champs","error");
-  if(!email.endsWith("@dgpe.gouv.ci")) return show("Email DGPE requis","error");
+  if(!email || !password)
+    return show("Veuillez remplir tous les champs","error");
 
-  show("Connexion en cours…","info");
+  if(!email.endsWith("@dgpe.gouv.ci"))
+    return show("Email professionnel DGPE requis","error");
 
-  // 1) AUTH
-  const { data: authData, error } = await supabaseClient.auth.signInWithPassword({
-    email, password
-  });
+  show("Connexion en cours…");
 
-  if(error || !authData?.user){
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if(error || !data.user)
     return show("Identifiants incorrects","error");
-  }
 
-  const authUser = authData.user;
-
-  // 2) PROFIL MÉTIER (table public.users) — on vérifie par auth_id
   const { data: profile, error: e2 } = await supabaseClient
     .from("users")
-    .select("status, role")
-    .eq("auth_id", authUser.id)
+    .select("status")
+    .eq("auth_id", data.user.id)
     .single();
 
   if(e2 || !profile){
@@ -100,14 +108,50 @@ window.login = async function(){
     return show("Compte en attente de validation administrateur","warning");
   }
 
-  // 3) OK
   show("Connexion autorisée. Redirection…","success");
-  setTimeout(() => window.location.href = "dashboard.html", 500);
-};
+  setTimeout(() => {
+    window.location.href = "dashboard.html";
+  }, 600);
+}
 
 /* ================= REGISTER ================= */
-window.register = async function(){
-  const email = emailInput();
-  const password = passwordInput();
+async function register(){
+  const email = emailInput.value.trim().toLowerCase();
+  const password = passwordInput.value.trim();
 
-  if(
+  if(!email || !password)
+    return show("Veuillez remplir tous les champs","error");
+
+  if(!email.endsWith("@dgpe.gouv.ci"))
+    return show("Inscription réservée aux emails DGPE","error");
+
+  if(password.length < 6)
+    return show("Mot de passe trop court (6 caractères minimum)","error");
+
+  show("Création du compte…");
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({ email, password });
+
+  if(error)
+    return show(error.message,"error");
+
+  if(data.user){
+    await supabaseClient.from("users").insert([{
+      auth_id: data.user.id,
+      email: email,
+      role: "AGENT",
+      status: "PENDING"
+    }]);
+  }
+
+  show("Compte créé. Validation administrateur requise.","success");
+}
+
+/* ================= EVENTS ================= */
+btnLogin.addEventListener("click", login);
+btnRegister.addEventListener("click", register);
+</script>
+
+</body>
+</html>
