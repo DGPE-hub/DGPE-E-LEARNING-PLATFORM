@@ -11,7 +11,7 @@
 
 <header class="navbar">
   <div class="wrap">
-    <img src="assets/img/dgpe-logo.png" class="logo">
+    <img src="assets/img/dgpe-logo.png" class="logo" alt="DGPE">
     <span class="brand">e-Learning</span>
     <nav class="nav">
       <a href="dashboard.html" class="active">Dashboard</a>
@@ -27,40 +27,33 @@
   </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const BASE_PATH = "/DGPE-E-LEARNING-PLATFORM/";
+<footer class="footer">
+© 2025 DGPE – Direction Générale du Portefeuille de l’État
+</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
 const supabaseClient = supabase.createClient(
   "https://rwjyxmzdwdddjaeghpae.supabase.co",
-  "TA_CLE_ANON_PUBLIQUE",
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
-      storage: window.localStorage
-    }
-  }
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3anl4bXpkd2RkZGphZWdocGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjk5OTQsImV4cCI6MjA4MTcwNTk5NH0.ByhiCOu5LvPIb-0iSqhWSNlInvPCls0GxEsxULF2LMA"
 );
 
 (async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+  const { data } = await supabaseClient.auth.getUser();
 
-  console.log("SESSION:", session);
-
-  if (!session) {
-    window.location.href = BASE_PATH + "login.html";
+  if (!data?.user) {
+    window.location.replace("login.html");
     return;
   }
 
   document.getElementById("welcome").textContent =
-    "Bienvenue " + session.user.email;
+    "Bienvenue " + data.user.email;
 })();
 
 document.getElementById("logout").onclick = async () => {
   await supabaseClient.auth.signOut();
-  window.location.href = BASE_PATH + "login.html";
+  window.location.replace("login.html");
 };
 </script>
 
