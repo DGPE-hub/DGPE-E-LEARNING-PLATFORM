@@ -71,21 +71,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-/* ================= CONFIG ================= */
-const BASE_PATH = "/DGPE-E-LEARNING-PLATFORM/";
-
-const SUPABASE_URL = "https://rwjyxmzdwdddjaeghpae.supabase.co";
-const SUPABASE_ANON_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3anl4bXpkd2RkZGphZWdocGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjk5OTQsImV4cCI6MjA4MTcwNTk5NH0.ByhiCOu5LvPIb-0iSqhWSNlInvPCls0GxEsxULF2LMA";
-
+/* ================= SUPABASE CONFIG ================= */
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "https://rwjyxmzdwdddjaeghpae.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3anl4bXpkd2RkZGphZWdocGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjk5OTQsImV4cCI6MjA4MTcwNTk5NH0.ByhiCOu5LvPIb-0iSqhWSNlInvPCls0GxEsxULF2LMA"
 );
 
 /* ================= UI ================= */
 const msg = document.getElementById("msg");
-
 function showMsg(text, type="info") {
   msg.textContent = text;
   msg.style.color =
@@ -97,7 +90,7 @@ function showMsg(text, type="info") {
 
 /* ================= LOGIN ================= */
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault(); // 🔥 empêche reload
+  e.preventDefault();
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -109,40 +102,22 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
   showMsg("⏳ Connexion en cours…");
 
-  const { data, error } =
-    await supabaseClient.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error || !data.user) {
     showMsg("❌ Email ou mot de passe incorrect.", "error");
     return;
   }
 
-  const authId = data.user.id;
-
-  const { data: profile, error: profileError } = await supabaseClient
-    .from("users")
-    .select("status, role")
-    .eq("auth_id", authId)
-    .single();
-
-  if (profileError || !profile) {
-    showMsg("⛔ Compte non autorisé DGPE.", "error");
-    return;
-  }
-
-  if (profile.status !== "ACTIF") {
-    showMsg("⛔ Compte non actif.", "warning");
-    return;
-  }
-
   showMsg("✅ Connexion réussie. Redirection…", "success");
 
+  // ✅ REDIRECTION ABSOLUE (LA CLÉ)
   setTimeout(() => {
-    window.location.replace(
-      profile.role === "ADMIN"
-        ? BASE_PATH + "admin.html"
-        : BASE_PATH + "dashboard.html"
-    );
+    window.location.href =
+      "https://dgpe-hub.github.io/DGPE-E-LEARNING-PLATFORM/dashboard.html";
   }, 600);
 });
 
